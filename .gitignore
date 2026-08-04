@@ -1,0 +1,20 @@
+# Spring Boot
+artgallery/target/
+artgallery/src/main/resources/application.properties
+
+# React
+artgallery-frontend/node_modules/
+artgallery-frontend/build/
+artgallery-frontend/dist/
+artgallery-frontend/.env
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
