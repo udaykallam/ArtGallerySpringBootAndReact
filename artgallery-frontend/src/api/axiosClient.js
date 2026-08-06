@@ -19,6 +19,11 @@ axiosClient.interceptors.response.use(
     response => response,
 
     error => {
+         if (!error.response) {
+
+            window.location.href =
+                "/server-unavailable";
+        }
 
         if (
             error.response?.status === 401

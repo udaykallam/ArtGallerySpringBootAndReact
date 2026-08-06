@@ -2977,3 +2977,58 @@ img { display: block; max-width: 100%; }
 
 .field-hint--error { color: #a07070; }
 .field-hint--ok    { color: #7aab8a; }
+
+
+/* Error page */
+
+.error-page{
+
+    min-height:100vh;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background: #1e1b18; ;
+
+}
+
+.error-card{
+
+    width:500px;
+
+    padding:50px;
+
+    background: #1e1b18;
+
+    border-radius:18px;
+
+    text-align:center;
+
+    box-shadow:0 15px 40px rgba(0,0,0,.08);
+
+}
+
+.error-icon{
+
+    font-size:70px;
+
+    margin-bottom:25px;
+
+}
+
+.error-card h1{
+
+    margin-bottom:15px;
+
+}
+
+.error-subtitle{
+
+    color:#666;
+
+    margin-bottom:35px;
+
+}

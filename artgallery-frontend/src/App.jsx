@@ -25,6 +25,8 @@ import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import VerifyOtpPage from "./pages/auth/VerifyOtpPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import OAuthSuccessPage from "./pages/auth/OAuthSuccessPage";
+import NotFoundPage from "./pages/errors/NotFoundPage";
+import ServerUnavailablePage from "./pages/errors/ServerUnavailablePage";
 
 
 function App() {
@@ -44,6 +46,16 @@ function App() {
                 <Route
                     path="/"
                     element={<HomePage />}
+                />
+
+                <Route
+                    path="*"
+                    element={<NotFoundPage />}
+                />
+
+                <Route
+                    path="/server-unavailable"
+                    element={<ServerUnavailablePage />}
                 />
 
                 <Route
