@@ -52,4 +52,7 @@ public class Artwork {
     @OneToMany(mappedBy = "artwork", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<ArtworkImage> images;
+
+    @OneToMany(mappedBy = "artwork")
+    private List<Review> reviews;
 }

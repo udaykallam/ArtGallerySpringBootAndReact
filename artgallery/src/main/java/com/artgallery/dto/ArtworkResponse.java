@@ -16,4 +16,6 @@ public class ArtworkResponse {
     private String artistName;
     private String categoryName;
     private Boolean availabilityStatus;
+    private Double averageRating;
+    private Integer reviewCount;
 }

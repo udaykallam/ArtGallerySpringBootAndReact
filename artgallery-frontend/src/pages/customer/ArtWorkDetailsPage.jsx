@@ -1,15 +1,191 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axiosClient from "../../api/axiosClient";
-import { toast } from "react-toastify";
 import { addToWishlist, addToCart } from "../../services/commerceService";
+import { toast } from "sonner";
+import {
+
+    getReviews,
+
+    getReviewSummary,
+
+    addReview,
+
+    deleteReview,
+
+    updateReview
+
+} from "../../services/reviewService";
 
 function ArtworkDetailsPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [artwork, setArtwork] = useState(null);
+    const [reviews, setReviews] = useState([]);
 
-    useEffect(() => { loadArtwork(); }, [id]);
+    const [summary, setSummary] = useState(null);
+
+    const [rating, setRating] = useState(0);
+
+    const [comment, setComment] = useState("");
+
+    const [editingReviewId, setEditingReviewId] =
+        useState(null);
+
+    const role = localStorage.getItem("role");
+
+    useEffect(() => {
+
+        loadArtwork();
+
+        loadReviews();
+
+        loadSummary();
+
+    }, [id]);
+
+    const loadReviews = async () => {
+
+        try {
+
+            const data = await getReviews(id);
+
+            setReviews(data);
+
+        } catch (error) {
+
+            console.error(error);
+
+        }
+
+    };
+
+    const loadSummary = async () => {
+
+        try {
+
+            const data =
+                await getReviewSummary(id);
+
+            setSummary(data);
+
+        } catch (error) {
+
+            console.error(error);
+
+        }
+
+    };
+
+    const submitReview = async () => {
+
+        if (rating === 0) {
+
+            toast.error(
+                "Please select a rating."
+            );
+
+            return;
+
+        }
+
+        try {
+
+            if (editingReviewId) {
+
+                await updateReview(
+
+                    editingReviewId,
+
+                    {
+
+                        rating,
+
+                        comment
+
+                    }
+
+                );
+
+                toast.success(
+                    "Review updated."
+                );
+
+            }
+
+            else {
+
+                await addReview(
+
+                    id,
+
+                    {
+
+                        rating,
+
+                        comment
+
+                    }
+
+                );
+
+                toast.success(
+                    "Review submitted."
+                );
+
+            }
+
+            setRating(0);
+
+            setComment("");
+
+            setEditingReviewId(null);
+
+            loadReviews();
+
+            loadSummary();
+
+        }
+
+        catch (error) {
+
+            toast.error(
+
+                error.response?.data ||
+
+                "Unable to submit review."
+
+            );
+
+        }
+
+    };
+
+    const removeReview = async (reviewId) => {
+
+        try {
+
+            await deleteReview(reviewId);
+
+            toast.success(
+                "Review deleted."
+            );
+
+            loadReviews();
+
+            loadSummary();
+
+        }
+
+        catch (error) {
+
+            toast.error(
+                "Unable to delete review."
+            );
+
+        }
+
+    };
 
     const loadArtwork = async () => {
         try {
@@ -130,6 +306,296 @@ function ArtworkDetailsPage() {
                             </button>
                         </div>
 
+
+                        {/* ===================== Reviews ===================== */}
+
+                        <div className="review-summary">
+
+                            <h2>
+                                Reviews & Ratings
+                            </h2>
+
+                            {
+                                summary &&
+
+                                <>
+
+                                    <div className="avg-rating">
+
+                                        <div className="avg-rating-score">
+
+                                            {summary.averageRating}
+
+                                        </div>
+
+                                        <div>
+
+                                            <div className="review-stars">
+
+                                                {"★".repeat(Math.round(summary.averageRating))}
+                                                {"☆".repeat(
+                                                    5 - Math.round(summary.averageRating)
+                                                )}
+
+                                            </div>
+
+                                            <div className="review-count">
+
+                                                {summary.reviewCount} Reviews
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    {
+                                        [
+
+                                            { label: "5 ★", count: summary.fiveStar },
+                                            { label: "4 ★", count: summary.fourStar },
+                                            { label: "3 ★", count: summary.threeStar },
+                                            { label: "2 ★", count: summary.twoStar },
+                                            { label: "1 ★", count: summary.oneStar }
+
+                                        ].map(item => {
+
+                                            const percent =
+
+                                                summary.reviewCount === 0
+
+                                                    ? 0
+
+                                                    : (item.count / summary.reviewCount) * 100;
+
+                                            return (
+
+                                                <div
+                                                    key={item.label}
+                                                    className="rating-bar"
+                                                >
+
+                                                    <span>
+
+                                                        {item.label}
+
+                                                    </span>
+
+                                                    <div className="rating-track">
+
+                                                        <div
+
+                                                            className="rating-fill"
+
+                                                            style={{
+
+                                                                width: `${percent}%`
+
+                                                            }}
+
+                                                        />
+
+                                                    </div>
+
+                                                    <strong>
+
+                                                        {item.count}
+
+                                                    </strong>
+
+                                                </div>
+
+                                            );
+
+                                        })
+                                    }
+
+                                </>
+
+                            }
+
+                        </div>
+
+                        {
+                            role === "ROLE_CUSTOMER" &&
+
+                            <div className="review-form">
+
+                                <h3>
+
+                                    Share your experience
+
+                                </h3>
+
+                                <p className="review-subtitle">
+
+                                    How would you rate this artwork?
+
+                                </p>
+
+                                <div className="star-picker">
+
+                                    {[1, 2, 3, 4, 5].map(star => (
+
+                                        <span
+
+                                            key={star}
+
+                                            onClick={() => setRating(star)}
+
+                                            style={{
+
+                                                color:
+
+                                                    star <= rating
+
+                                                        ? "#D4B483"
+
+                                                        : "#555"
+
+                                            }}
+
+                                        >
+
+                                            ★
+
+                                        </span>
+
+                                    ))}
+
+                                </div>
+
+                                <textarea
+
+                                    rows="5"
+
+                                    placeholder="Share your experience with this artwork..."
+
+                                    value={comment}
+
+                                    onChange={(e) => setComment(e.target.value)}
+
+                                />
+
+                                <button
+
+                                    className="btn-primary"
+
+                                    onClick={submitReview}
+
+                                >
+
+                                    {
+
+                                        editingReviewId
+
+                                            ?
+
+                                            "Update Review"
+
+                                            :
+
+                                            "Submit Review"
+
+                                    }
+
+                                </button>
+
+                            </div>
+
+                        }
+
+                        <div className="review-list">
+
+                            {
+
+                                reviews.length === 0 ?
+
+                                    (
+
+                                        <div className="no-reviews">
+
+                                            No reviews yet.
+
+                                            <br />
+
+                                            Be the first to review this artwork.
+
+                                        </div>
+
+                                    )
+
+                                    :
+
+                                    reviews.map(review => (
+
+                                        <div
+                                            className="review-card"
+                                            key={review.reviewId}
+                                        >
+
+                                            <div className="review-header">
+
+                                                <div className="review-user">
+
+                                                    <div className="review-avatar">
+
+                                                        {
+
+                                                            review.customerName
+                                                                .charAt(0)
+                                                                .toUpperCase()
+
+                                                        }
+
+                                                    </div>
+
+                                                    <div>
+
+                                                        <div className="review-name">
+
+                                                            {review.customerName}
+
+                                                        </div>
+
+                                                        <div className="review-date">
+
+                                                            {
+
+                                                                new Date(
+                                                                    review.createdAt
+                                                                ).toLocaleDateString()
+
+                                                            }
+
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                            <div className="review-stars">
+
+                                                {"★".repeat(review.rating)}
+                                                {"☆".repeat(5 - review.rating)}
+
+                                            </div>
+
+                                            <div className="review-comment">
+
+                                                {review.comment}
+
+                                            </div>
+
+                                        </div>
+
+                                    ))
+
+                            }
+
+                        </div>
                     </div>
                 </div>
             </div>
