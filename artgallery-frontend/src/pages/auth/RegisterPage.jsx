@@ -6,6 +6,10 @@ function RegisterPage() {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({ name: "", email: "", phone: "", password: "" });
 
+     const googleLogin = () => {
+        window.location.href = "http://localhost:8080/oauth2/authorization/google";
+    };
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
@@ -81,6 +85,20 @@ function RegisterPage() {
 
                     <button type="submit" className="btn-primary">
                         Create Account
+                    </button>
+
+                    <div className="auth-divider-row">
+                        <span className="auth-divider-line" />
+                        <span className="auth-or-text">or</span>
+                        <span className="auth-divider-line" />
+                    </div>
+
+                    <button type="button" className="google-btn" onClick={googleLogin}>
+                        <img
+                            src="https://www.svgrepo.com/show/475656/google-color.svg"
+                            alt="Google"
+                        />
+                        Continue with Google
                     </button>
 
                 </form>

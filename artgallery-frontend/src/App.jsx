@@ -27,6 +27,7 @@ import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import OAuthSuccessPage from "./pages/auth/OAuthSuccessPage";
 import NotFoundPage from "./pages/errors/NotFoundPage";
 import ServerUnavailablePage from "./pages/errors/ServerUnavailablePage";
+import ProfilePage from "./pages/profile/ProfilePage";
 
 
 function App() {
@@ -91,6 +92,11 @@ function App() {
                 <Route
                     path="/register"
                     element={<RegisterPage />}
+                />
+
+                <Route
+                    path="/profile"
+                    element={<ProfilePage />}
                 />
 
                 <Route

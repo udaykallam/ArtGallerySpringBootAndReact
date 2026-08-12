@@ -27,6 +27,16 @@ public class User {
 
     private boolean enabled = true;
 
+    private String address;
+
+    private String city;
+
+    private String state;
+
+    private String pincode;
+
+    private String country;
+
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;

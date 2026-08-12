@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axiosClient from "../../api/axiosClient";
+import { toast } from "sonner";
 
 function LoginPage() {
     const navigate = useNavigate();
@@ -18,12 +19,14 @@ function LoginPage() {
             localStorage.setItem("token", response.data.token);
             localStorage.setItem("role", response.data.role);
             localStorage.setItem("userId", response.data.userId);
+            localStorage.setItem("userName",response.data.name);
             const role = response.data.role;
             if (role === "ROLE_ADMIN") navigate("/admin/dashboard");
             else if (role === "ROLE_ARTIST") navigate("/artist/dashboard");
             else navigate("/");
         } catch (error) {
-            alert(error.response?.data?.message || error.response?.data || "Login failed");
+            toast.error("Invalid email or password. Please try again.");
+            console.error(error.response?.data?.message || error.response?.data);
         }
     };
 

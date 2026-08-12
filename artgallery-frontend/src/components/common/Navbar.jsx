@@ -1,23 +1,93 @@
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+
 
 function Navbar() {
 
     const navigate = useNavigate();
 
-    const token = localStorage.getItem("token");
-    const role = localStorage.getItem("role");
+    const [menuOpen, setMenuOpen] =
+        useState(false);
+
+    const menuRef = useRef(null);
+
+
+    const token =
+        localStorage.getItem("token");
+
+    const role =
+        localStorage.getItem("role");
+
+    const userName =
+        localStorage.getItem("userName") ||
+        "Account";
+
+
+    // =========================
+    // CLOSE MENU WHEN CLICKING OUTSIDE
+    // =========================
+
+    useEffect(() => {
+
+        const handleClickOutside = (event) => {
+
+            if (
+                menuRef.current &&
+                !menuRef.current.contains(event.target)
+            ) {
+
+                setMenuOpen(false);
+
+            }
+
+        };
+
+
+        document.addEventListener(
+            "mousedown",
+            handleClickOutside
+        );
+
+
+        return () => {
+
+            document.removeEventListener(
+                "mousedown",
+                handleClickOutside
+            );
+
+        };
+
+    }, []);
+
+
+    // =========================
+    // LOGOUT
+    // =========================
 
     const logout = () => {
 
         localStorage.removeItem("token");
+
         localStorage.removeItem("role");
 
+        localStorage.removeItem("userId");
+
+        localStorage.removeItem("userName");
+
+        setMenuOpen(false);
+
         navigate("/login");
+
     };
+
 
     return (
 
         <nav className="navbar">
+
+
+            {/* LOGO */}
 
             <div className="nav-logo">
 
@@ -27,17 +97,22 @@ function Navbar() {
 
             </div>
 
+
+            {/* LINKS */}
+
             <div className="nav-links">
 
                 <Link to="/">
                     Home
                 </Link>
 
+
                 {/* CUSTOMER */}
 
                 {role === "ROLE_CUSTOMER" && (
 
                     <>
+
                         <Link to="/wishlist">
                             Wishlist
                         </Link>
@@ -46,18 +121,17 @@ function Navbar() {
                             Cart
                         </Link>
 
-                        <Link to="/orders">
-                            Orders
-                        </Link>
                     </>
 
                 )}
+
 
                 {/* ARTIST */}
 
                 {role === "ROLE_ARTIST" && (
 
                     <>
+
                         <Link to="/artist/dashboard">
                             Dashboard
                         </Link>
@@ -73,15 +147,18 @@ function Navbar() {
                         <Link to="/artist/orders">
                             Orders
                         </Link>
+
                     </>
 
                 )}
+
 
                 {/* ADMIN */}
 
                 {role === "ROLE_ADMIN" && (
 
                     <>
+
                         <Link to="/admin/dashboard">
                             Dashboard
                         </Link>
@@ -101,22 +178,164 @@ function Navbar() {
                         <Link to="/admin/orders">
                             Orders
                         </Link>
+
                     </>
 
                 )}
 
+
+                {/* =========================
+                    USER DROPDOWN
+                ========================= */}
+
                 {token ? (
 
-                    <button
-                        className="logout-btn"
-                        onClick={logout}
+                    <div
+                        className="nav-user-menu"
+                        ref={menuRef}
                     >
-                        Logout
-                    </button>
+
+                        <button
+                            className="nav-user-button"
+                            onClick={() =>
+                                setMenuOpen(
+                                    prev => !prev
+                                )
+                            }
+                        >
+
+                            <span className="nav-user-avatar">
+
+                                {userName
+                                    ?.charAt(0)
+                                    ?.toUpperCase()}
+
+                            </span>
+
+                            <span className="nav-user-name">
+
+                                {userName}
+
+                            </span>
+
+                            <span className="nav-user-arrow">
+
+                                {menuOpen
+                                    ? "▲"
+                                    : "▼"}
+
+                            </span>
+
+                        </button>
+
+
+                        {menuOpen && (
+
+                            <div className="nav-dropdown">
+
+
+                                <Link
+                                    to="/profile"
+                                    onClick={() =>
+                                        setMenuOpen(false)
+                                    }
+                                >
+
+                                    <span>
+                                        👤
+                                    </span>
+
+                                    Profile
+
+                                </Link>
+
+
+                                {role === "ROLE_CUSTOMER" && (
+
+                                    <Link
+                                        to="/orders"
+                                        onClick={() =>
+                                            setMenuOpen(false)
+                                        }
+                                    >
+
+                                        <span>
+                                            📦
+                                        </span>
+
+                                        My Orders
+
+                                    </Link>
+
+                                )}
+
+
+                                {role === "ROLE_ARTIST" && (
+
+                                    <Link
+                                        to="/artist/dashboard"
+                                        onClick={() =>
+                                            setMenuOpen(false)
+                                        }
+                                    >
+
+                                        <span>
+                                            🎨
+                                        </span>
+
+                                        Artist Dashboard
+
+                                    </Link>
+
+                                )}
+
+
+                                {role === "ROLE_ADMIN" && (
+
+                                    <Link
+                                        to="/admin/dashboard"
+                                        onClick={() =>
+                                            setMenuOpen(false)
+                                        }
+                                    >
+
+                                        <span>
+                                            ⚙️
+                                        </span>
+
+                                        Admin Dashboard
+
+                                    </Link>
+
+                                )}
+
+
+                                <div className="nav-dropdown-divider" />
+
+
+                                <button
+                                    className="nav-dropdown-logout"
+                                    onClick={logout}
+                                >
+
+                                    <span>
+                                        ↪
+                                    </span>
+
+                                    Logout
+
+                                </button>
+
+                            </div>
+
+                        )}
+
+                    </div>
 
                 ) : (
 
                     <>
+
                         <Link to="/login">
                             Login
                         </Link>
@@ -124,6 +343,7 @@ function Navbar() {
                         <Link to="/register">
                             Register
                         </Link>
+
                     </>
 
                 )}
@@ -131,7 +351,10 @@ function Navbar() {
             </div>
 
         </nav>
+
     );
+
 }
+
 
 export default Navbar;
