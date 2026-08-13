@@ -8,10 +8,15 @@ function ForgotPasswordPage() {
     const navigate = useNavigate();
 
     const [email, setEmail] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
     const sendOtp = async (e) => {
 
         e.preventDefault();
+
+        if (isLoading) return;
+
+        setIsLoading(true);
 
         try {
 
@@ -38,6 +43,8 @@ function ForgotPasswordPage() {
                 "Unable to send OTP."
             );
 
+        } finally {
+            setIsLoading(false);
         }
 
     };
@@ -79,8 +86,9 @@ function ForgotPasswordPage() {
                     <button
                         type="submit"
                         className="btn-primary"
+                        disabled={isLoading}
                     >
-                        Send OTP
+                        {isLoading ? "Sending OTP..." : "Send OTP"}
                     </button>
 
                 </form>

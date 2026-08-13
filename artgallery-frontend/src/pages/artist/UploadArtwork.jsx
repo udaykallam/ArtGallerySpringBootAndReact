@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { uploadArtwork, getCategories } from "../../services/artistService";
+import {toast} from "sonner"; 
 
 function UploadArtwork() {
     const navigate = useNavigate();
@@ -12,6 +13,7 @@ function UploadArtwork() {
     });
     const [images, setImages] = useState([]);
     const [previews, setPreviews] = useState([]);
+    const [isUploading, setIsUploading] = useState(false);
 
     useEffect(() => { loadCategories(); }, []);
 
@@ -42,11 +44,18 @@ function UploadArtwork() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (isUploading) return;
+
+        setIsUploading(true);
+
         try {
             await uploadArtwork(formData, images);
-            alert("Artwork uploaded successfully");
+            toast.success("Artwork uploaded successfully");
+            navigate("/artist/artworks");
         } catch (error) {
-            alert(error.response?.data?.message || "Upload failed");
+            toast.error(error.response?.data?.message || "Upload failed");
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -262,8 +271,9 @@ function UploadArtwork() {
                                 type="submit"
                                 className="btn-primary"
                                 style={{ flex: 2, padding: "12px" }}
+                                disabled={isUploading}
                             >
-                                Upload to Gallery
+                                {isUploading ? "Uploading..." : "Upload to Gallery"}
                             </button>
                         </div>
 

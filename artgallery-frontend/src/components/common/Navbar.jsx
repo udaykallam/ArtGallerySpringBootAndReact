@@ -144,10 +144,6 @@ function Navbar() {
                             Upload
                         </Link>
 
-                        <Link to="/artist/orders">
-                            Orders
-                        </Link>
-
                     </>
 
                 )}
@@ -289,6 +285,24 @@ function Navbar() {
 
                                 )}
 
+                                {role === "ROLE_ARTIST" && (
+
+                                    <Link
+                                        to="/artist/orders"
+                                        onClick={() =>
+                                            setMenuOpen(false)
+                                        }
+                                    >
+
+                                        <span>
+                                            🚛
+                                        </span>
+
+                                         Orders
+
+                                    </Link>
+
+                                )}
 
                                 {role === "ROLE_ADMIN" && (
 

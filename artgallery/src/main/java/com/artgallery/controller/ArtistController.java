@@ -1,5 +1,6 @@
 package com.artgallery.controller;
 
+import com.artgallery.dto.ArtistArtworkResponse;
 import com.artgallery.dto.ArtistDashboardResponse;
 import com.artgallery.dto.ArtistOrderResponse;
 import com.artgallery.entity.Artwork;
@@ -31,7 +32,7 @@ public class ArtistController {
     }
 
     @GetMapping("/artworks")
-    public List<Artwork> myArtworks(
+    public List<ArtistArtworkResponse> getMyArtworks(
             Principal principal
     ) {
 

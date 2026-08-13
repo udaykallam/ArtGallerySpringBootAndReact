@@ -1,5 +1,6 @@
 package com.artgallery.service.impl;
 
+import com.artgallery.dto.ArtistArtworkResponse;
 import com.artgallery.dto.ArtistDashboardResponse;
 import com.artgallery.dto.ArtistOrderResponse;
 import com.artgallery.dto.UpdateArtworkRequest;
@@ -129,18 +130,109 @@ public class ArtistService {
                 monthlyRevenue
         );
     }
-    public List<Artwork> getMyArtworks(
+
+    public List<ArtistArtworkResponse> getMyArtworks(
             String email
     ) {
 
-        User artist =
-                userRepo.findByEmail(email)
-                        .orElseThrow();
+        User artist = userRepo.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("Artist not found")
+                );
 
         return artworkRepo
                 .findByArtistIdAndIsDeletedFalse(
                         artist.getId()
-                );
+                )
+                .stream()
+                .map(artwork -> {
+
+                    ArtistArtworkResponse dto =
+                            new ArtistArtworkResponse();
+
+                    dto.setId(
+                            artwork.getId()
+                    );
+
+                    dto.setTitle(
+                            artwork.getTitle()
+                    );
+
+                    dto.setDescription(
+                            artwork.getDescription()
+                    );
+
+                    dto.setPrice(
+                            artwork.getPrice()
+                    );
+
+                    dto.setDiscountPrice(
+                            artwork.getDiscountPrice()
+                    );
+
+                    dto.setAdminOverridePrice(
+                            artwork.getAdminOverridePrice()
+                    );
+
+                    dto.setStock(
+                            artwork.getStock()
+                    );
+
+                    dto.setFeatured(
+                            artwork.getFeatured()
+                    );
+
+                    dto.setFramed(
+                            artwork.getFramed()
+                    );
+
+                    dto.setMedium(
+                            artwork.getMedium()
+                    );
+
+                    dto.setDimensions(
+                            artwork.getDimensions()
+                    );
+
+                    dto.setAvailabilityStatus(
+                            artwork.getAvailabilityStatus()
+                    );
+
+                    if (artwork.getCategory() != null) {
+
+                        dto.setCategoryName(
+                                artwork.getCategory().getName()
+                        );
+                    }
+
+                    if (
+                            artwork.getImages() != null &&
+                                    !artwork.getImages().isEmpty()
+                    ) {
+
+                        dto.setImageUrl(
+                                artwork.getImages()
+                                        .get(0)
+                                        .getImageUrl()
+                        );
+                    }
+
+                    dto.setAverageRating(
+                            artwork.getAverageRating()
+                    );
+
+                    dto.setReviewCount(
+                            artwork.getReviews() == null
+                                    ? 0L
+                                    : (long) artwork
+                                    .getReviews()
+                                    .size()
+                    );
+
+                    return dto;
+
+                })
+                .toList();
     }
 
     @Transactional
