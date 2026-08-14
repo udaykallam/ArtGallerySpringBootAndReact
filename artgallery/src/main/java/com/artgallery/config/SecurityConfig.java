@@ -41,44 +41,40 @@ public class SecurityConfig {
                 .cors(cors -> {})
                 .csrf(csrf -> csrf.disable())
 
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(
-                                SessionCreationPolicy.STATELESS
-                        )
-                )
-
                 .authorizeHttpRequests(auth -> auth
 
+                        // Public authentication endpoints
                         .requestMatchers(
-
-                                "/api/auth/**",
-                                "/api/artworks/**",
-
-                                "/oauth2/**",
-                                "/login/**"
-
+                                "/api/auth/register",
+                                "/api/auth/login",
+                                "/api/auth/forgot-password",
+                                "/api/auth/verify-otp",
+                                "/api/auth/reset-password"
                         ).permitAll()
 
-                        .anyRequest()
+                        // Google OAuth
+                        .requestMatchers(
+                                "/oauth2/**",
+                                "/login/oauth2/**"
+                        ).permitAll()
 
-                        .authenticated()
+                        // Public artwork APIs
+                        .requestMatchers(
+                                "/api/artworks/**"
+                        ).permitAll()
 
-                )
+                        // Logged-in users only
+                        .requestMatchers(
+                                "/api/auth/change-password"
+                        ).authenticated()
 
-                .oauth2Login(oauth ->
-
-                        oauth.successHandler(
-                                oAuth2LoginSuccessHandler
-                        )
-
+                        // Everything else
+                        .anyRequest().authenticated()
                 )
 
                 .addFilterBefore(
-
                         jwtAuthFilter,
-
                         UsernamePasswordAuthenticationFilter.class
-
                 );
 
         return http.build();

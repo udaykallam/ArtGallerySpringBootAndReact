@@ -88,13 +88,16 @@ function Navbar() {
 
 
             {/* LOGO */}
-
+            {/* LOGO */}
             <div className="nav-logo">
-
                 <Link to="/">
+                    <img
+                        src="/art_logo.png"
+                        alt="Aurelian Gallery"
+                        className="nav-logo-img"
+                    />
                     Aurelian Gallery
                 </Link>
-
             </div>
 
 
@@ -245,6 +248,21 @@ function Navbar() {
 
                                 </Link>
 
+                                <Link
+                                    to="/settings"
+                                    onClick={() =>
+                                        setMenuOpen(false)
+                                    }
+                                >
+
+                                    <span>
+                                        ⚙️
+                                    </span>
+
+                                    Settings
+
+                                </Link>
+
 
                                 {role === "ROLE_CUSTOMER" && (
 
@@ -264,6 +282,7 @@ function Navbar() {
                                     </Link>
 
                                 )}
+
 
 
                                 {role === "ROLE_ARTIST" && (
@@ -298,7 +317,7 @@ function Navbar() {
                                             🚛
                                         </span>
 
-                                         Orders
+                                        Orders
 
                                     </Link>
 

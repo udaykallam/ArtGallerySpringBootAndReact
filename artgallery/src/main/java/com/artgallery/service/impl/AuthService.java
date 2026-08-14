@@ -27,8 +27,6 @@ public class AuthService {
     @Autowired
     private RoleRepository roleRepo;
 
-    @Autowired
-    private PasswordEncoder encoder;
 
     @Autowired
     private JwtService jwtService;
@@ -50,7 +48,7 @@ public class AuthService {
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
-        user.setPassword(encoder.encode(request.getPassword()));
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setPhone(request.getPhone());
         user.setRole(role);
 
@@ -71,7 +69,7 @@ public class AuthService {
                     "Your account has been suspended. Please contact support."
             );
         }
-        if (!encoder.matches(request.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
 
@@ -161,5 +159,72 @@ public class AuthService {
         otpRepo.delete(token);
 
         return "Password reset successful.";
+    }
+
+    @Transactional
+    public String changePassword(
+            String email,
+            String currentPassword,
+            String newPassword,
+            String confirmPassword
+    ) {
+
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found.")
+                );
+
+        if (!user.isEnabled()) {
+
+            throw new RuntimeException(
+                    "Your account has been suspended."
+            );
+        }
+
+        // Check current password
+        if (!passwordEncoder.matches(
+                currentPassword,
+                user.getPassword()
+        )) {
+
+            throw new RuntimeException(
+                    "Current password is incorrect."
+            );
+        }
+
+        // Check new password confirmation
+        if (!newPassword.equals(confirmPassword)) {
+
+            throw new RuntimeException(
+                    "New passwords do not match."
+            );
+        }
+
+        // Don't allow the same password
+        if (passwordEncoder.matches(
+                newPassword,
+                user.getPassword()
+        )) {
+
+            throw new RuntimeException(
+                    "New password must be different from your current password."
+            );
+        }
+
+        // Basic password validation
+        if (newPassword.length() < 8) {
+
+            throw new RuntimeException(
+                    "New password must contain at least 8 characters."
+            );
+        }
+
+        user.setPassword(
+                passwordEncoder.encode(newPassword)
+        );
+
+        userRepo.save(user);
+
+        return "Password changed successfully.";
     }
 }

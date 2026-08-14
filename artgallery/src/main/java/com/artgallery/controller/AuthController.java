@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -69,5 +71,30 @@ public class AuthController {
                         request.getNewPassword()
                 )
         );
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(
+            @RequestBody ChangePasswordRequest request,
+            Principal principal
+    ) {
+
+        try {
+
+            return ResponseEntity.ok(
+                    authService.changePassword(
+                            principal.getName(),
+                            request.getCurrentPassword(),
+                            request.getNewPassword(),
+                            request.getConfirmPassword()
+                    )
+            );
+
+        } catch (RuntimeException ex) {
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(ex.getMessage());
+        }
     }
 }

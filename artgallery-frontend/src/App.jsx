@@ -28,6 +28,8 @@ import OAuthSuccessPage from "./pages/auth/OAuthSuccessPage";
 import NotFoundPage from "./pages/errors/NotFoundPage";
 import ServerUnavailablePage from "./pages/errors/ServerUnavailablePage";
 import ProfilePage from "./pages/profile/ProfilePage";
+import ChangePasswordPage from "./pages/auth/ChangePasswordPage";
+import SettingsPage from "./pages/customer/SettingsPage";
 
 
 function App() {
@@ -77,6 +79,16 @@ function App() {
                 <Route
                     path="/forgot-password"
                     element={<ForgotPasswordPage />}
+                />
+
+                <Route
+                    path="/settings"
+                    element={<SettingsPage />}
+                />
+
+                <Route
+                    path="/change-password"
+                    element={<ChangePasswordPage />}
                 />
 
                 <Route
