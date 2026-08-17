@@ -12,20 +12,34 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class CustomUserDetailsService implements UserDetailsService {
+public class CustomUserDetailsService
+        implements UserDetailsService {
 
     @Autowired
     private UserRepository repo;
 
     @Override
-    public UserDetails loadUserByUsername(String email) {
-        User user = repo.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public UserDetails loadUserByUsername(
+            String email
+    ) {
 
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPassword(),
-                List.of(new SimpleGrantedAuthority(user.getRole().getName().name()))
-        );
+        User user =
+                repo.findByEmail(email)
+                        .orElseThrow(() ->
+                                new UsernameNotFoundException(
+                                        "User not found"
+                                )
+                        );
+
+        return org.springframework.security.core.userdetails.User
+                .withUsername(user.getEmail())
+                .password(user.getPassword())
+                .authorities(
+                        user.getRole()
+                                .getName()
+                                .name()
+                )
+                .disabled(!user.isEnabled())
+                .build();
     }
 }

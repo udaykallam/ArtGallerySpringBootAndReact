@@ -22,10 +22,25 @@ function LoginPage() {
         e.preventDefault();
         try {
             const response = await axiosClient.post("/auth/login", { email, password });
-            localStorage.setItem("token", response.data.token);
-            localStorage.setItem("role", response.data.role);
-            localStorage.setItem("userId", response.data.userId);
-            localStorage.setItem("userName",response.data.name);
+            localStorage.setItem(
+                "token",
+                response.data.token
+            );
+
+            localStorage.setItem(
+                "role",
+                response.data.role
+            );
+
+            localStorage.setItem(
+                "userId",
+                response.data.userId
+            );
+
+            localStorage.setItem(
+                "userName",
+                response.data.name
+            );
             const role = response.data.role;
             if (role === "ROLE_ADMIN") navigate("/admin/dashboard");
             else if (role === "ROLE_ARTIST") navigate("/artist/dashboard");

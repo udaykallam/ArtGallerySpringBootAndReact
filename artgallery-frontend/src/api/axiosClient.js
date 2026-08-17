@@ -1,69 +1,83 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-  baseURL: "http://localhost:8080/api",
+    baseURL: "http://localhost:8080/api",
 });
 
-axiosClient.interceptors.request.use((config) => {
+axiosClient.interceptors.request.use(
+    (config) => {
 
-  const token = localStorage.getItem("token");
+        const token =
+            localStorage.getItem("token");
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
+        if (token) {
 
-  return config;
-});
+            config.headers.Authorization =
+                `Bearer ${token}`;
+        }
+
+        return config;
+    },
+
+    (error) => Promise.reject(error)
+);
+
 
 axiosClient.interceptors.response.use(
-    response => response,
 
-    error => {
-         if (!error.response) {
+    (response) => response,
+
+    (error) => {
+
+        // =========================
+        // BACKEND NOT AVAILABLE
+        // =========================
+
+        if (!error.response) {
 
             window.location.href =
                 "/server-unavailable";
+
+            return Promise.reject(error);
         }
 
-        if (
-            error.response?.status === 401
-        ) {
 
-            localStorage.removeItem(
-                "token"
-            );
+        // =========================
+        // UNAUTHORIZED
+        // =========================
 
-            localStorage.removeItem(
-                "role"
-            );
+        if (error.response.status === 401) {
 
-            alert(
-                "Session expired. Please login again."
-            );
+            localStorage.removeItem("token");
+            localStorage.removeItem("role");
+            localStorage.removeItem("userId");
+            localStorage.removeItem("userName");
 
             window.location.href =
                 "/login";
+
+            return Promise.reject(error);
         }
 
-        if (
-            error.response?.status === 403
-        ) {
 
-            localStorage.removeItem(
-                "token"
+        // =========================
+        // FORBIDDEN
+        // =========================
+
+        if (error.response.status === 403) {
+
+            console.error(
+                "403 Forbidden:",
+                error.response.data
             );
 
-            localStorage.removeItem(
-                "role"
-            );
+            // DO NOT LOG THE USER OUT HERE
+            // A 403 does not necessarily mean
+            // the account is suspended.
 
-            alert(
-                "Your account has been suspended."
-            );
-
-            window.location.href =
-                "/login";
+            return Promise.reject(error);
         }
+
 
         return Promise.reject(error);
     }

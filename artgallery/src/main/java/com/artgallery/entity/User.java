@@ -43,4 +43,12 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<Review> reviews;
+
+    @OneToOne(
+            mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private UserSettings settings;
+
 }

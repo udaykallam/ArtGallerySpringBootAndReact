@@ -1,19 +1,142 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+
+import {
+    getSettings,
+    updateNotificationSettings
+} from "../../services/settingsService";
 
 function SettingsPage() {
 
     const navigate = useNavigate();
 
-    const [orderNotifications, setOrderNotifications] =
-        useState(true);
+    const [settings, setSettings] = useState({
+        orderNotifications: true,
+        emailNotifications: true,
+        promotionalEmails: false
+    });
 
-    const [emailNotifications, setEmailNotifications] =
-        useState(true);
+    const [loading, setLoading] = useState(true);
 
-    const [promotionalEmails, setPromotionalEmails] =
-        useState(false);
+    const [saving, setSaving] = useState(false);
+
+
+    useEffect(() => {
+
+        loadSettings();
+
+    }, []);
+
+
+    const loadSettings = async () => {
+
+        try {
+
+            const data = await getSettings();
+
+            setSettings(data);
+
+        } catch (error) {
+
+            console.error(
+                "Failed to load settings:",
+                error
+            );
+
+            toast.error(
+                "Unable to load your settings."
+            );
+
+        } finally {
+
+            setLoading(false);
+
+        }
+    };
+
+
+    const handleToggle = async (
+        setting,
+        value
+    ) => {
+
+        const previousSettings = {
+            ...settings
+        };
+
+        const updatedSettings = {
+            ...settings,
+            [setting]: value
+        };
+
+        setSettings(updatedSettings);
+
+        setSaving(true);
+
+        try {
+
+            const data =
+                await updateNotificationSettings(
+                    updatedSettings
+                );
+
+            setSettings(data);
+
+            toast.success(
+                "Notification preference updated."
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Failed to update settings:",
+                error
+            );
+
+            setSettings(
+                previousSettings
+            );
+
+            const responseData =
+                error?.response?.data;
+
+            const message =
+                typeof responseData === "string"
+                    ? responseData
+                    : responseData?.message ||
+                      "Unable to update settings.";
+
+            toast.error(message);
+
+        } finally {
+
+            setSaving(false);
+
+        }
+    };
+
+
+    if (loading) {
+
+        return (
+
+            <div className="loading-screen">
+
+                <div className="load-mark">
+                    ✦
+                </div>
+
+                <div className="load-text">
+                    Loading your settings...
+                </div>
+
+            </div>
+
+        );
+
+    }
+
 
     return (
 
@@ -86,7 +209,9 @@ function SettingsPage() {
                         <button
                             className="btn-view settings-action"
                             onClick={() =>
-                                navigate("/change-password")
+                                navigate(
+                                    "/change-password"
+                                )
                             }
                         >
                             Change Password
@@ -122,6 +247,8 @@ function SettingsPage() {
                     </div>
 
 
+                    {/* ORDER NOTIFICATIONS */}
+
                     <div className="settings-item">
 
                         <div>
@@ -140,9 +267,13 @@ function SettingsPage() {
 
                             <input
                                 type="checkbox"
-                                checked={orderNotifications}
+                                checked={
+                                    settings.orderNotifications
+                                }
+                                disabled={saving}
                                 onChange={(e) =>
-                                    setOrderNotifications(
+                                    handleToggle(
+                                        "orderNotifications",
                                         e.target.checked
                                     )
                                 }
@@ -154,6 +285,8 @@ function SettingsPage() {
 
                     </div>
 
+
+                    {/* EMAIL NOTIFICATIONS */}
 
                     <div className="settings-item">
 
@@ -173,9 +306,13 @@ function SettingsPage() {
 
                             <input
                                 type="checkbox"
-                                checked={emailNotifications}
+                                checked={
+                                    settings.emailNotifications
+                                }
+                                disabled={saving}
                                 onChange={(e) =>
-                                    setEmailNotifications(
+                                    handleToggle(
+                                        "emailNotifications",
                                         e.target.checked
                                     )
                                 }
@@ -187,6 +324,8 @@ function SettingsPage() {
 
                     </div>
 
+
+                    {/* PROMOTIONAL EMAILS */}
 
                     <div className="settings-item">
 
@@ -206,9 +345,13 @@ function SettingsPage() {
 
                             <input
                                 type="checkbox"
-                                checked={promotionalEmails}
+                                checked={
+                                    settings.promotionalEmails
+                                }
+                                disabled={saving}
                                 onChange={(e) =>
-                                    setPromotionalEmails(
+                                    handleToggle(
+                                        "promotionalEmails",
                                         e.target.checked
                                     )
                                 }
@@ -240,7 +383,7 @@ function SettingsPage() {
                             </h2>
 
                             <p>
-                                Manage your privacy preferences.
+                                Manage your personal information.
                             </p>
 
                         </div>
@@ -257,7 +400,7 @@ function SettingsPage() {
                             </h3>
 
                             <p>
-                                Manage your name, phone number and address from your profile.
+                                Manage your name, phone number and address.
                             </p>
 
                         </div>
@@ -331,13 +474,13 @@ function SettingsPage() {
                 </section>
 
 
-                {/* BACK */}
-
                 <div className="settings-footer">
 
                     <button
                         className="btn-secondary"
-                        onClick={() => navigate(-1)}
+                        onClick={() =>
+                            navigate(-1)
+                        }
                     >
                         Back
                     </button>
