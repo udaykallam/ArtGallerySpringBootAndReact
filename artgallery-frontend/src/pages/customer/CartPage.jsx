@@ -12,13 +12,34 @@ function CartPage() {
     useEffect(() => { loadCart(); }, []);
 
     const loadCart = async () => {
+
         try {
+
             const data = await getCart();
-            setCart(data);
+
+            setCart(
+                Array.isArray(data)
+                    ? data
+                    : []
+            );
+
         } catch (error) {
-            alert(error.response?.data?.message || "Failed to load cart");
+
+            console.error(
+                "Failed to load cart:",
+                error.response?.data || error
+            );
+
+            alert(
+                error.response?.data?.message ||
+                error.response?.data ||
+                "Failed to load cart"
+            );
+
         } finally {
+
             setLoading(false);
+
         }
     };
 

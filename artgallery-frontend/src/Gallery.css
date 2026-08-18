@@ -254,6 +254,236 @@ img { display: block; max-width: 100%; }
 }
 
 /* ════════════════════════════════════════
+   NOTIFICATION BELL
+   ════════════════════════════════════════ */
+
+.notification-wrapper {
+  position: relative;
+}
+
+.notification-bell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.notification-bell:hover {
+  border-color: var(--border-mid);
+  background: var(--gold-faint);
+}
+
+.notification-icon {
+  font-size: 16px;
+  opacity: 0.85;
+  line-height: 1;
+}
+
+.notification-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 4px;
+  border-radius: 50%;
+  background: #a07070;
+  color: var(--wall);
+  font-family: var(--font-ui);
+  font-size: 9px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  border: 1px solid var(--wall);
+}
+
+/* ── Dropdown panel ── */
+.notification-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 340px;
+  max-height: 420px;
+  background: var(--wall-mid);
+  border: 1px solid var(--border-mid);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+  z-index: 200;
+  animation: dropdownIn 0.15s ease-out;
+  display: flex;
+  flex-direction: column;
+}
+
+.notification-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.notification-header h3 {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-style: italic;
+  font-size: 18px;
+  color: var(--text-bright);
+  margin-bottom: 3px;
+}
+
+.notification-header > div > span {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.notification-read-all {
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.75;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.notification-read-all:hover { opacity: 1; }
+
+/* ── List ── */
+.notification-list {
+  overflow-y: auto;
+  max-height: 340px;
+}
+
+.notification-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.notification-empty > div {
+  font-size: 28px;
+  opacity: 0.35;
+}
+
+.notification-empty p {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 14px 18px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+  position: relative;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item:hover {
+  background: rgba(212, 180, 131, 0.04);
+}
+
+.notification-item.unread {
+  background: rgba(212, 180, 131, 0.03);
+}
+
+.notification-item-icon {
+  font-size: 15px;
+  opacity: 0.75;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.notification-item-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.notification-item-title {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--text-main);
+  line-height: 1.3;
+}
+
+.notification-item.unread .notification-item-title {
+  color: var(--text-bright);
+}
+
+.notification-item-message {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.notification-item-date {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-ghost);
+  margin-top: 2px;
+}
+
+.notification-unread-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .notification-dropdown {
+    position: fixed;
+    top: 64px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-height: calc(100vh - 90px);
+  }
+}
+
+/* ════════════════════════════════════════
    AUTH PAGES — Login & Register
    ════════════════════════════════════════ */
 .auth-page {

@@ -58,18 +58,31 @@ public class SecurityConfig {
                                 "/login/oauth2/**"
                         ).permitAll()
 
+                        // WebSocket handshake
+                        .requestMatchers(
+                                "/ws/**"
+                        ).permitAll()
+
                         // Public artwork APIs
                         .requestMatchers(
                                 "/api/artworks/**"
                         ).permitAll()
 
-                        // Logged-in users only
+                        // Authenticated change password
                         .requestMatchers(
                                 "/api/auth/change-password"
                         ).authenticated()
 
                         // Everything else
                         .anyRequest().authenticated()
+                )
+
+                .oauth2Login(oauth2 -> oauth2
+
+                        .successHandler(
+                                oAuth2LoginSuccessHandler
+                        )
+
                 )
 
                 .addFilterBefore(

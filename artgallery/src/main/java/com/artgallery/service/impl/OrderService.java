@@ -4,6 +4,7 @@ import com.artgallery.dto.CheckoutResponse;
 import com.artgallery.dto.OrderResponse;
 import com.artgallery.dto.UpdateOrderStatusRequest;
 import com.artgallery.entity.*;
+import com.artgallery.enums.NotificationType;
 import com.artgallery.enums.OrderStatus;
 import com.artgallery.repository.CartRepository;
 import com.artgallery.repository.OrderItemRepository;
@@ -29,6 +30,9 @@ public class OrderService {
 
     @Autowired
     private OrderRepository orderRepo;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Autowired
     private OrderItemRepository orderItemRepo;
@@ -103,10 +107,18 @@ public class OrderService {
 
         Order savedOrder = orderRepo.save(order);
 
-        orderItemRepo.saveAll(orderItems);
 
         // Clear cart
         cartRepo.deleteAll(cartItems);
+
+        orderItemRepo.saveAll(orderItems);
+        notificationService.createNotification(
+                order.getUser().getId(),
+                "Order Placed",
+                "Your order #" + order.getId() +
+                        " has been placed successfully.",
+                NotificationType.ORDER
+        );
 
         return new CheckoutResponse(
                 savedOrder.getId(),

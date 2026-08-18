@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import NotificationBell from "../NotificationBell";
 
 
 function Navbar() {
@@ -68,11 +69,8 @@ function Navbar() {
     const logout = () => {
 
         localStorage.removeItem("token");
-
         localStorage.removeItem("role");
-
         localStorage.removeItem("userId");
-
         localStorage.removeItem("userName");
 
         setMenuOpen(false);
@@ -86,22 +84,30 @@ function Navbar() {
 
         <nav className="navbar">
 
+            {/* =========================
+                LOGO
+            ========================= */}
 
-            {/* LOGO */}
-            {/* LOGO */}
             <div className="nav-logo">
+
                 <Link to="/">
+
                     <img
                         src="/art_logo.png"
                         alt="Aurelian Gallery"
                         className="nav-logo-img"
                     />
+
                     Aurelian Gallery
+
                 </Link>
+
             </div>
 
 
-            {/* LINKS */}
+            {/* =========================
+                NAVIGATION LINKS
+            ========================= */}
 
             <div className="nav-links">
 
@@ -110,7 +116,9 @@ function Navbar() {
                 </Link>
 
 
-                {/* CUSTOMER */}
+                {/* =========================
+                    CUSTOMER
+                ========================= */}
 
                 {role === "ROLE_CUSTOMER" && (
 
@@ -129,7 +137,9 @@ function Navbar() {
                 )}
 
 
-                {/* ARTIST */}
+                {/* =========================
+                    ARTIST
+                ========================= */}
 
                 {role === "ROLE_ARTIST" && (
 
@@ -152,7 +162,9 @@ function Navbar() {
                 )}
 
 
-                {/* ADMIN */}
+                {/* =========================
+                    ADMIN
+                ========================= */}
 
                 {role === "ROLE_ADMIN" && (
 
@@ -184,6 +196,17 @@ function Navbar() {
 
 
                 {/* =========================
+                    NOTIFICATIONS
+                ========================= */}
+
+                {token && (
+
+                    <NotificationBell />
+
+                )}
+
+
+                {/* =========================
                     USER DROPDOWN
                 ========================= */}
 
@@ -198,10 +221,13 @@ function Navbar() {
                             className="nav-user-button"
                             onClick={() =>
                                 setMenuOpen(
-                                    prev => !prev
+                                    previous =>
+                                        !previous
                                 )
                             }
                         >
+
+                            {/* Avatar */}
 
                             <span className="nav-user-avatar">
 
@@ -211,11 +237,17 @@ function Navbar() {
 
                             </span>
 
+
+                            {/* Name */}
+
                             <span className="nav-user-name">
 
                                 {userName}
 
                             </span>
+
+
+                            {/* Arrow */}
 
                             <span className="nav-user-arrow">
 
@@ -228,10 +260,15 @@ function Navbar() {
                         </button>
 
 
+                        {/* =========================
+                            DROPDOWN
+                        ========================= */}
+
                         {menuOpen && (
 
                             <div className="nav-dropdown">
 
+                                {/* PROFILE */}
 
                                 <Link
                                     to="/profile"
@@ -248,6 +285,9 @@ function Navbar() {
 
                                 </Link>
 
+
+                                {/* SETTINGS */}
+
                                 <Link
                                     to="/settings"
                                     onClick={() =>
@@ -263,6 +303,8 @@ function Navbar() {
 
                                 </Link>
 
+
+                                {/* CUSTOMER ORDERS */}
 
                                 {role === "ROLE_CUSTOMER" && (
 
@@ -284,6 +326,7 @@ function Navbar() {
                                 )}
 
 
+                                {/* ARTIST DASHBOARD */}
 
                                 {role === "ROLE_ARTIST" && (
 
@@ -304,6 +347,9 @@ function Navbar() {
 
                                 )}
 
+
+                                {/* ARTIST ORDERS */}
+
                                 {role === "ROLE_ARTIST" && (
 
                                     <Link
@@ -322,6 +368,9 @@ function Navbar() {
                                     </Link>
 
                                 )}
+
+
+                                {/* ADMIN DASHBOARD */}
 
                                 {role === "ROLE_ADMIN" && (
 
@@ -343,8 +392,14 @@ function Navbar() {
                                 )}
 
 
-                                <div className="nav-dropdown-divider" />
+                                {/* DIVIDER */}
 
+                                <div
+                                    className="nav-dropdown-divider"
+                                />
+
+
+                                {/* LOGOUT */}
 
                                 <button
                                     className="nav-dropdown-logout"

@@ -51,4 +51,6 @@ public class User {
     )
     private UserSettings settings;
 
+    @OneToMany(mappedBy = "user")
+    private List<Notification> notifications;
 }

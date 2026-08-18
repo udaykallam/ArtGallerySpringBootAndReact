@@ -1,5 +1,7 @@
 package com.artgallery.security;
 
+import com.artgallery.entity.User;
+import com.artgallery.repository.UserRepository;
 import com.artgallery.service.impl.CustomUserDetailsService;
 import com.artgallery.service.impl.JwtService;
 
@@ -27,18 +29,38 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
+    @Autowired
+    private UserRepository userRepo;
+
+
+    @Override
+    protected boolean shouldNotFilter(
+            HttpServletRequest request
+    ) {
+
+        String path =
+                request.getServletPath();
+
+        return path.startsWith("/oauth2/")
+                || path.startsWith("/login/oauth2/");
+    }
+
+
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain
-    ) throws ServletException, IOException {
+    )
+            throws ServletException, IOException {
 
         String authHeader =
                 request.getHeader("Authorization");
 
+
         if (
-                authHeader == null ||
+                authHeader == null
+                        ||
                         !authHeader.startsWith("Bearer ")
         ) {
 
@@ -50,54 +72,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
+
         String token =
                 authHeader.substring(7);
 
+        String username;
+
+
         try {
 
-            String username =
+            username =
                     jwtService.extractUsername(token);
-
-            if (
-                    username != null &&
-                            SecurityContextHolder
-                                    .getContext()
-                                    .getAuthentication() == null
-            ) {
-
-                UserDetails userDetails =
-                        userDetailsService
-                                .loadUserByUsername(
-                                        username
-                                );
-
-                if (
-                        jwtService.isTokenValid(
-                                token,
-                                userDetails
-                        )
-                ) {
-
-                    UsernamePasswordAuthenticationToken
-                            authToken =
-                            new UsernamePasswordAuthenticationToken(
-                                    userDetails,
-                                    null,
-                                    userDetails.getAuthorities()
-                            );
-
-                    authToken.setDetails(
-                            new WebAuthenticationDetailsSource()
-                                    .buildDetails(request)
-                    );
-
-                    SecurityContextHolder
-                            .getContext()
-                            .setAuthentication(
-                                    authToken
-                            );
-                }
-            }
 
         } catch (Exception e) {
 
@@ -106,11 +91,93 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             );
 
             response.getWriter().write(
-                    "Invalid or expired token"
+                    "Token expired"
             );
 
             return;
         }
+
+
+        if (
+                username != null
+                        &&
+                        SecurityContextHolder
+                                .getContext()
+                                .getAuthentication()
+                                == null
+        ) {
+
+            User user =
+                    userRepo.findByEmail(username)
+                            .orElse(null);
+
+
+            if (
+                    user == null
+                            ||
+                            !user.isEnabled()
+            ) {
+
+                response.setStatus(
+                        HttpServletResponse.SC_FORBIDDEN
+                );
+
+                response.getWriter().write(
+                        "Account suspended"
+                );
+
+                return;
+            }
+
+
+            UserDetails userDetails =
+                    userDetailsService
+                            .loadUserByUsername(
+                                    username
+                            );
+
+
+            if (
+                    !jwtService.isTokenValid(
+                            token,
+                            userDetails
+                    )
+            ) {
+
+                response.setStatus(
+                        HttpServletResponse.SC_UNAUTHORIZED
+                );
+
+                response.getWriter().write(
+                        "Token expired"
+                );
+
+                return;
+            }
+
+
+            UsernamePasswordAuthenticationToken
+                    authToken =
+                    new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+
+
+            authToken.setDetails(
+                    new WebAuthenticationDetailsSource()
+                            .buildDetails(request)
+            );
+
+
+            SecurityContextHolder
+                    .getContext()
+                    .setAuthentication(
+                            authToken
+                    );
+        }
+
 
         filterChain.doFilter(
                 request,

@@ -12,8 +12,9 @@ function OAuthSuccessPage() {
         );
 
         const token = params.get("token");
-
         const role = params.get("role");
+        const userId = params.get("userId");
+        const userName = params.get("name");
 
         if (!token || !role) {
 
@@ -22,16 +23,10 @@ function OAuthSuccessPage() {
             return;
 
         }
-
-        localStorage.setItem(
-            "token",
-            token
-        );
-
-        localStorage.setItem(
-            "role",
-            role
-        );
+        localStorage.setItem("token", token);
+        localStorage.setItem("role", role);
+        localStorage.setItem("userId", userId);
+        localStorage.setItem("userName", userName);
 
         switch (role) {
 

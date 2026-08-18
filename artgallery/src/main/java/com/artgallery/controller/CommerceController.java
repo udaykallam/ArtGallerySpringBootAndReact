@@ -1,14 +1,16 @@
 package com.artgallery.controller;
 
+import com.artgallery.dto.CartItemResponse;
 import com.artgallery.dto.CartRequest;
+import com.artgallery.dto.UpdateCartQuantityRequest;
 import com.artgallery.service.impl.CommerceService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import com.artgallery.dto.UpdateCartQuantityRequest;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/commerce")
@@ -18,49 +20,95 @@ public class CommerceController {
     @Autowired
     private CommerceService commerceService;
 
-    // ===================== WISHLIST =====================
+
+    // =====================================================
+    // WISHLIST
+    // =====================================================
 
     @PostMapping("/wishlist/{artworkId}")
-    public String addToWishlist(@PathVariable Long artworkId,
-                                Principal principal) {
-        return commerceService.addToWishlist(artworkId, principal.getName());
+    public String addToWishlist(
+            @PathVariable Long artworkId,
+            Principal principal
+    ) {
+
+        return commerceService.addToWishlist(
+                artworkId,
+                principal.getName()
+        );
     }
+
 
     @GetMapping("/wishlist")
-    public Object getWishlist(Principal principal) {
-        return commerceService.getWishlist(principal.getName());
+    public Object getWishlist(
+            Principal principal
+    ) {
+
+        return commerceService.getWishlist(
+                principal.getName()
+        );
     }
+
 
     @DeleteMapping("/wishlist/{artworkId}")
-    public String removeWishlist(@PathVariable Long artworkId,
-                                 Principal principal) {
-        return commerceService.removeFromWishlist(artworkId, principal.getName());
+    public String removeWishlist(
+            @PathVariable Long artworkId,
+            Principal principal
+    ) {
+
+        return commerceService.removeFromWishlist(
+                artworkId,
+                principal.getName()
+        );
     }
 
-    // ===================== CART =====================
+
+    // =====================================================
+    // CART
+    // =====================================================
 
     @PostMapping("/cart")
-    public String addToCart(@RequestBody CartRequest request,
-                            Principal principal) {
-        return commerceService.addToCart(request, principal.getName());
+    public String addToCart(
+            @RequestBody CartRequest request,
+            Principal principal
+    ) {
+
+        return commerceService.addToCart(
+                request,
+                principal.getName()
+        );
     }
+
 
     @GetMapping("/cart")
-    public Object getCart(Principal principal) {
-        return commerceService.getCart(principal.getName());
+    public List<CartItemResponse> getCart(
+            Principal principal
+    ) {
+
+        return commerceService.getCart(
+                principal.getName()
+        );
     }
 
+
     @DeleteMapping("/cart/{artworkId}")
-    public String removeCart(@PathVariable Long artworkId,
-                             Principal principal) {
-        return commerceService.removeFromCart(artworkId, principal.getName());
+    public String removeCart(
+            @PathVariable Long artworkId,
+            Principal principal
+    ) {
+
+        return commerceService.removeFromCart(
+                artworkId,
+                principal.getName()
+        );
     }
+
 
     @PutMapping("/cart/{artworkId}")
     public String updateCartQuantity(
             @PathVariable Long artworkId,
             @RequestBody UpdateCartQuantityRequest request,
-            Principal principal) {
+            Principal principal
+    ) {
 
         commerceService.updateCartQuantity(
                 artworkId,
@@ -71,4 +119,3 @@ public class CommerceController {
         return "Cart updated successfully";
     }
 }
-
