@@ -1,7 +1,13 @@
 package com.artgallery.config;
 
+import com.artgallery.security.WebSocketAuthInterceptor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
@@ -11,31 +17,45 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig
         implements WebSocketMessageBrokerConfigurer {
 
+
+    @Autowired
+    private WebSocketAuthInterceptor
+            webSocketAuthInterceptor;
+
+
     @Override
     public void configureMessageBroker(
             MessageBrokerRegistry config
     ) {
-
-        // Messages sent to /topic or /queue
-        // are handled by the message broker.
 
         config.enableSimpleBroker(
                 "/topic",
                 "/queue"
         );
 
-        // Messages sent from the client to the server
-        // will use /app.
-
         config.setApplicationDestinationPrefixes(
                 "/app"
         );
 
-        // Prefix used for user-specific destinations.
-
         config.setUserDestinationPrefix(
                 "/user"
         );
+    }
+
+
+    // ==========================================
+    // STOMP CHANNEL INTERCEPTOR
+    // ==========================================
+
+    @Override
+    public void configureClientInboundChannel(
+            ChannelRegistration registration
+    ) {
+
+        registration.interceptors(
+                webSocketAuthInterceptor
+        );
+
     }
 
 
@@ -50,5 +70,6 @@ public class WebSocketConfig
                 .setAllowedOrigins(
                         "http://localhost:5173"
                 );
+
     }
 }

@@ -36,4 +36,46 @@ public class EmailServiceImpl implements EmailService {
 
         mailSender.send(message);
     }
+
+    @Override
+    public void sendOrderConfirmation(
+            String email,
+            String customerName,
+            Long orderId,
+            double totalAmount
+    ) {
+
+        SimpleMailMessage message =
+                new SimpleMailMessage();
+
+        message.setTo(email);
+
+        message.setSubject(
+                "Aurelian Gallery | Order #" + orderId + " Confirmed"
+        );
+
+        message.setText(
+                "Dear " + customerName + ",\n\n" +
+
+                        "Thank you for your purchase from Aurelian Gallery.\n\n" +
+
+                        "Your order has been placed successfully.\n\n" +
+
+                        "Order ID: #" + orderId + "\n" +
+
+                        "Order Total: ₹" +
+                        String.format("%.2f", totalAmount) +
+                        "\n\n" +
+
+                        "We will notify you when your order status changes.\n\n" +
+
+                        "You can view your order from your Aurelian Gallery account.\n\n" +
+
+                        "Best regards,\n" +
+                        "Aurelian Gallery\n" +
+                        "Art. Elegance. Inspiration."
+        );
+
+        mailSender.send(message);
+    }
 }

@@ -7,17 +7,12 @@ import {
     getUnreadCount
 } from "../services/notificationService";
 
-
 function useNotifications() {
 
-    const [notifications, setNotifications] =
-        useState([]);
-
-    const [unreadCount, setUnreadCount] =
-        useState(0);
+    const [notifications, setNotifications] = useState([]);
+    const [unreadCount, setUnreadCount] = useState(0);
 
     const clientRef = useRef(null);
-
 
     // ==========================================
     // LOAD EXISTING NOTIFICATIONS
@@ -27,10 +22,13 @@ function useNotifications() {
 
         try {
 
-            const data =
-                await getNotifications();
+            const data = await getNotifications();
 
-            setNotifications(data);
+            setNotifications(
+                Array.isArray(data)
+                    ? data
+                    : []
+            );
 
         } catch (error) {
 
@@ -40,6 +38,7 @@ function useNotifications() {
             );
 
         }
+
     };
 
 
@@ -51,10 +50,13 @@ function useNotifications() {
 
         try {
 
-            const count =
-                await getUnreadCount();
+            const count = await getUnreadCount();
 
-            setUnreadCount(count);
+            setUnreadCount(
+                typeof count === "number"
+                    ? count
+                    : 0
+            );
 
         } catch (error) {
 
@@ -64,37 +66,48 @@ function useNotifications() {
             );
 
         }
+
     };
 
 
     // ==========================================
-    // ADD REAL-TIME NOTIFICATION
+    // HANDLE REAL-TIME NOTIFICATION
     // ==========================================
 
     const handleIncomingNotification = (
         notification
     ) => {
 
-        setNotifications(
-            previous => [
+        setNotifications(previous => {
+
+            // Prevent duplicate notifications
+            const alreadyExists =
+                previous.some(
+                    item =>
+                        item.id === notification.id
+                );
+
+            if (alreadyExists) {
+                return previous;
+            }
+
+            return [
                 notification,
                 ...previous
-            ]
-        );
+            ];
+
+        });
 
         setUnreadCount(
             previous => previous + 1
         );
 
 
-        // ======================================
-        // SHOW SONNER TOAST
-        // ======================================
-
         toast(notification.title, {
             description:
                 notification.message
         });
+
     };
 
 
@@ -111,102 +124,144 @@ function useNotifications() {
             localStorage.getItem("role");
 
         if (!token || !role) {
-
             return;
         }
 
 
-        const client =
-            new Client({
+        const client = new Client({
 
-                brokerURL:
-                    "ws://localhost:8080/ws",
-
-                reconnectDelay:
-                    5000,
-
-                debug: () => {
-                    // Keep empty in production
-                },
-
-                onConnect: () => {
-
-                    console.log(
-                        "WebSocket connected."
-                    );
+            brokerURL:
+                "ws://localhost:8080/ws",
 
 
-                    client.subscribe(
-                        "/user/queue/notifications",
+            // ==================================
+            // IMPORTANT
+            // SEND JWT TO STOMP CONNECTION
+            // ==================================
 
-                        message => {
+            connectHeaders: {
 
-                            try {
+                Authorization:
+                    `Bearer ${token}`
 
-                                const notification =
-                                    JSON.parse(
-                                        message.body
-                                    );
+            },
 
-                                handleIncomingNotification(
-                                    notification
+
+            reconnectDelay: 5000,
+
+
+            debug: () => {
+                // Disable STOMP debug logs
+            },
+
+
+            // ==================================
+            // CONNECTED
+            // ==================================
+
+            onConnect: () => {
+
+                console.log(
+                    "WebSocket connected."
+                );
+
+
+                client.subscribe(
+                    "/user/queue/notifications",
+
+                    message => {
+
+                        try {
+
+                            const notification =
+                                JSON.parse(
+                                    message.body
                                 );
 
-                            } catch (error) {
+                            console.log(
+                                "Real-time notification:",
+                                notification
+                            );
 
-                                console.error(
-                                    "Invalid notification:",
-                                    error
-                                );
+                            handleIncomingNotification(
+                                notification
+                            );
 
-                            }
+                        } catch (error) {
+
+                            console.error(
+                                "Invalid notification:",
+                                error
+                            );
 
                         }
-                    );
 
-                },
+                    }
+                );
 
-                onStompError: (
+            },
+
+
+            // ==================================
+            // STOMP ERROR
+            // ==================================
+
+            onStompError: frame => {
+
+                console.error(
+                    "STOMP error:",
                     frame
-                ) => {
+                );
 
-                    console.error(
-                        "STOMP error:",
-                        frame
-                    );
+            },
 
-                },
 
-                onWebSocketError: (
+            // ==================================
+            // WEBSOCKET ERROR
+            // ==================================
+
+            onWebSocketError: error => {
+
+                console.error(
+                    "WebSocket error:",
                     error
-                ) => {
+                );
 
-                    console.error(
-                        "WebSocket error:",
-                        error
-                    );
+            },
 
-                }
 
-            });
+            // ==================================
+            // DISCONNECTED
+            // ==================================
+
+            onDisconnect: () => {
+
+                console.log(
+                    "WebSocket disconnected."
+                );
+
+            }
+
+        });
 
 
         client.activate();
 
-        clientRef.current =
-            client;
+        clientRef.current = client;
 
+
+        // ======================================
+        // CLEANUP
+        // ======================================
 
         return () => {
 
-            if (
-                clientRef.current
-            ) {
+            if (clientRef.current) {
 
                 clientRef.current.deactivate();
 
-                clientRef.current =
-                    null;
+                clientRef.current = null;
+
             }
 
         };
@@ -249,7 +304,7 @@ function useNotifications() {
         loadUnreadCount
 
     };
-}
 
+}
 
 export default useNotifications;

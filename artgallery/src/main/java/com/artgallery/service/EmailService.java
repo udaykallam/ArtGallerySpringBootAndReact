@@ -7,4 +7,10 @@ public interface EmailService {
             String otp
     );
 
+    void sendOrderConfirmation(
+            String email,
+            String customerName,
+            Long orderId,
+            double totalAmount
+    );
 }

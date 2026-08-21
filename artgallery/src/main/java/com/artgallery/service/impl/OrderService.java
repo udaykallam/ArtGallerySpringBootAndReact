@@ -11,6 +11,7 @@ import com.artgallery.repository.OrderItemRepository;
 import com.artgallery.repository.OrderRepository;
 import com.artgallery.repository.UserRepository;
 
+import com.artgallery.service.EmailService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class OrderService {
@@ -36,6 +38,9 @@ public class OrderService {
 
     @Autowired
     private OrderItemRepository orderItemRepo;
+
+    @Autowired
+    private EmailService emailService;
 
     // ===================== CHECKOUT =====================
 
@@ -112,14 +117,56 @@ public class OrderService {
         cartRepo.deleteAll(cartItems);
 
         orderItemRepo.saveAll(orderItems);
-        notificationService.createNotification(
-                order.getUser().getId(),
-                "Order Placed",
-                "Your order #" + order.getId() +
-                        " has been placed successfully.",
-                NotificationType.ORDER
-        );
+        // ==========================================
+// CUSTOMER NOTIFICATION
+// ==========================================
 
+        User orderUser = order.getUser();
+
+        UserSettings settings = orderUser.getSettings();
+
+
+// Web notification
+        if (
+                settings == null
+                        ||
+                        settings.isOrderNotifications()
+        ) {
+
+            notificationService.createNotification(
+
+                    orderUser.getId(),
+
+                    "Order Placed",
+
+                    "Your order #" +
+                            order.getId() +
+                            " has been placed successfully.",
+
+                    NotificationType.ORDER
+            );
+        }
+
+
+// ==========================================
+// CUSTOMER EMAIL
+// ==========================================
+
+        if (
+                user.getSettings() != null
+                        &&
+                        user.getSettings().isEmailNotifications()
+                        &&
+                        user.getSettings().isOrderNotifications()
+        ) {
+
+            emailService.sendOrderConfirmation(
+                    user.getEmail(),
+                    user.getName(),
+                    savedOrder.getId(),
+                    savedOrder.getTotalAmount()
+            );
+        }
         return new CheckoutResponse(
                 savedOrder.getId(),
                 savedOrder.getTotalAmount(),
