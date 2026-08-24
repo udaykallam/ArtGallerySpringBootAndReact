@@ -78,4 +78,107 @@ public class EmailServiceImpl implements EmailService {
 
         mailSender.send(message);
     }
+
+    @Override
+    public void sendOrderStatusUpdate(
+            String email,
+            String customerName,
+            Long orderId,
+            String status,
+            double totalAmount
+    ) {
+
+        SimpleMailMessage message =
+                new SimpleMailMessage();
+
+        message.setTo(email);
+
+        message.setSubject(
+                "Aurelian Gallery | Order #" +
+                        orderId +
+                        " Status Update"
+        );
+
+
+        String statusMessage;
+
+        switch (status) {
+
+            case "PACKED":
+
+                statusMessage =
+                        "Your order has been packed and is ready for shipment.";
+
+                break;
+
+            case "SHIPPED":
+
+                statusMessage =
+                        "Your order has been shipped and is on its way.";
+
+                break;
+
+            case "DELIVERED":
+
+                statusMessage =
+                        "Your order has been delivered successfully.";
+
+                break;
+
+            case "CANCELLED":
+
+                statusMessage =
+                        "Your order has been cancelled.";
+
+                break;
+
+            default:
+
+                statusMessage =
+                        "Your order status has been updated to " +
+                                status +
+                                ".";
+
+                break;
+        }
+
+
+        message.setText(
+
+                "Dear " +
+                        customerName +
+                        ",\n\n" +
+
+                        "There is an update regarding your " +
+                        "Aurelian Gallery order.\n\n" +
+
+                        "Order ID: #" +
+                        orderId +
+                        "\n" +
+
+                        "Order Total: ₹" +
+                        String.format(
+                                "%.2f",
+                                totalAmount
+                        ) +
+                        "\n" +
+
+                        "Current Status: " +
+                        status +
+                        "\n\n" +
+
+                        statusMessage +
+                        "\n\n" +
+
+                        "You can view your order from " +
+                        "your Aurelian Gallery account.\n\n" +
+
+                        "Best regards,\n" +
+                        "Aurelian Gallery\n" +
+                        "Art. Elegance. Inspiration."
+        );
+
+
+        mailSender.send(message);
+    }
 }

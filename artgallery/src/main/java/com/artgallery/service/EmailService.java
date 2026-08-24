@@ -13,4 +13,12 @@ public interface EmailService {
             Long orderId,
             double totalAmount
     );
+
+    void sendOrderStatusUpdate(
+            String email,
+            String customerName,
+            Long orderId,
+            String status,
+            double totalAmount
+    );
 }

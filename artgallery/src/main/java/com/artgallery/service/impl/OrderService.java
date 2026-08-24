@@ -1,25 +1,20 @@
 package com.artgallery.service.impl;
-
 import com.artgallery.dto.CheckoutResponse;
 import com.artgallery.dto.OrderResponse;
 import com.artgallery.dto.UpdateOrderStatusRequest;
 import com.artgallery.entity.*;
 import com.artgallery.enums.NotificationType;
 import com.artgallery.enums.OrderStatus;
-import com.artgallery.repository.CartRepository;
-import com.artgallery.repository.OrderItemRepository;
-import com.artgallery.repository.OrderRepository;
-import com.artgallery.repository.UserRepository;
-
+import com.artgallery.repository.*;
+import com.artgallery.entity.UserSettings;
+import com.artgallery.repository.UserSettingsRepository;
 import com.artgallery.service.EmailService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 @Service
 public class OrderService {
@@ -41,6 +36,9 @@ public class OrderService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private UserSettingsRepository settingsRepo;
 
     // ===================== CHECKOUT =====================
 
@@ -200,16 +198,152 @@ public class OrderService {
     }
 
     @Transactional
-    public String updateOrderStatus(Long orderId,
-                                    UpdateOrderStatusRequest request) {
+    public String updateOrderStatus(
+            Long orderId,
+            UpdateOrderStatusRequest request
+    ) {
 
         Order order = orderRepo.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() ->
+                        new RuntimeException("Order not found")
+                );
 
-        order.setStatus(request.getStatus());
+        OrderStatus oldStatus = order.getStatus();
+        OrderStatus newStatus = request.getStatus();
 
-        orderRepo.save(order);
+        // Don't create a notification if nothing changed
+        if (oldStatus == newStatus) {
+            return "Order is already " + newStatus;
+        }
 
-        return "Order status updated to " + request.getStatus();
+        // ==========================================
+        // UPDATE ORDER STATUS
+        // ==========================================
+
+        order.setStatus(newStatus);
+
+        Order savedOrder = orderRepo.save(order);
+
+        // ==========================================
+        // GET CUSTOMER
+        // ==========================================
+
+        User customer = savedOrder.getUser();
+
+        if (customer == null) {
+            throw new RuntimeException(
+                    "Order does not have an associated customer."
+            );
+        }
+
+        // ==========================================
+        // NOTIFICATION CONTENT
+        // ==========================================
+
+        String title;
+        String message;
+
+        switch (newStatus) {
+
+            case PACKED:
+
+                title = "Order #" + orderId + " Packed";
+
+                message =
+                        "Your order #" + orderId +
+                                " has been packed and is ready for shipment.";
+
+                break;
+
+            case SHIPPED:
+
+                title = "Order #" + orderId + " Shipped";
+
+                message =
+                        "Your order #" + orderId +
+                                " has been shipped and is on its way.";
+
+                break;
+
+            case DELIVERED:
+
+                title = "Order #" + orderId + " Delivered";
+
+                message =
+                        "Your order #" + orderId +
+                                " has been delivered successfully.";
+
+                break;
+
+            case CANCELLED:
+
+                title = "Order #" + orderId + " Cancelled";
+
+                message =
+                        "Your order #" + orderId +
+                                " has been cancelled.";
+
+                break;
+
+            case PLACED:
+
+                title = "Order #" + orderId + " Placed";
+
+                message =
+                        "Your order #" + orderId +
+                                " has been placed successfully.";
+
+                break;
+
+            default:
+
+                title = "Order #" + orderId + " Updated";
+
+                message =
+                        "The status of your order #" +
+                                orderId +
+                                " has been changed to " +
+                                newStatus + ".";
+
+                break;
+        }
+
+        // ==========================================
+        // CREATE WEB NOTIFICATION
+        // ==========================================
+
+        notificationService.createNotification(
+                customer.getId(),
+                title,
+                message,
+                NotificationType.ORDER
+        );
+
+        // ==========================================
+        // SEND EMAIL
+        // ==========================================
+
+        UserSettings settings =
+                settingsRepo.findByUser(customer)
+                        .orElse(null);
+
+        if (
+                settings != null
+                        &&
+                        settings.isEmailNotifications()
+                        &&
+                        settings.isOrderNotifications()
+        ) {
+
+            emailService.sendOrderStatusUpdate(
+                    customer.getEmail(),
+                    customer.getName(),
+                    orderId,
+                    newStatus.name(),
+                    savedOrder.getTotalAmount()
+            );
+        }
+
+        return "Order status updated to " + newStatus;
     }
 }

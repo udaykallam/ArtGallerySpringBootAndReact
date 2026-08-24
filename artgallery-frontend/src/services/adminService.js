@@ -161,13 +161,12 @@ export const updateOrderStatus = async (
     status
 ) => {
 
-    const response =
-        await axiosClient.put(
-            `/admin/orders/${id}`,
-            {
-                status
-            }
-        );
+    const response = await axiosClient.patch(
+        `/orders/admin/${id}/status`,
+        {
+            status: status
+        }
+    );
 
     return response.data;
 };
