@@ -30,6 +30,7 @@ import ServerUnavailablePage from "./pages/errors/ServerUnavailablePage";
 import ProfilePage from "./pages/profile/ProfilePage";
 import ChangePasswordPage from "./pages/auth/ChangePasswordPage";
 import SettingsPage from "./pages/customer/SettingsPage";
+import VerifyEmailPage from "./pages/auth/VerifyEmailPage";
 
 
 function App() {
@@ -69,6 +70,11 @@ function App() {
                 <Route
                     path="/login"
                     element={<LoginPage />}
+                />
+
+                <Route
+                    path="/verify-email"
+                    element={<VerifyEmailPage />}
                 />
 
                 <Route

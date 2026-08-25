@@ -3,10 +3,12 @@ package com.artgallery.service.impl;
 import com.artgallery.dto.AuthResponse;
 import com.artgallery.dto.LoginRequest;
 import com.artgallery.dto.RegisterRequest;
+import com.artgallery.entity.EmailVerificationToken;
 import com.artgallery.entity.PasswordResetOtp;
 import com.artgallery.entity.Role;
 import com.artgallery.entity.User;
 import com.artgallery.enums.RoleName;
+import com.artgallery.repository.EmailVerificationTokenRepository;
 import com.artgallery.repository.PasswordResetOtpRepository;
 import com.artgallery.repository.RoleRepository;
 import com.artgallery.repository.UserRepository;
@@ -15,6 +17,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import java.util.UUID;
 
 import java.time.LocalDateTime;
 
@@ -40,22 +43,153 @@ public class AuthService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private EmailVerificationTokenRepository verificationTokenRepo;
+
+    @Transactional
     public AuthResponse register(RegisterRequest request) {
 
-        Role role = roleRepo.findByName(RoleName.ROLE_CUSTOMER)
-                .orElseThrow();
+        if (userRepo.findByEmail(request.getEmail()).isPresent()) {
+
+            throw new RuntimeException(
+                    "An account already exists with this email."
+            );
+        }
+
+        Role role =
+                roleRepo.findByName(
+                        RoleName.ROLE_CUSTOMER
+                ).orElseThrow();
 
         User user = new User();
+
         user.setName(request.getName());
+
         user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setPhone(request.getPhone());
+
+        user.setPassword(
+                passwordEncoder.encode(
+                        request.getPassword()
+                )
+        );
+
+        user.setPhone(
+                request.getPhone()
+        );
+
+        // Account is active but email is not verified.
+        user.setEnabled(true);
+        user.setEmailVerified(false);
+
         user.setRole(role);
 
         userRepo.save(user);
 
-        String token = jwtService.generateToken(user.getEmail());
-        return new AuthResponse(token,user.getRole().getName().name(),user.getId(),user.getName());
+
+        // ==========================================
+        // CREATE VERIFICATION TOKEN
+        // ==========================================
+
+        String verificationToken =
+                UUID.randomUUID().toString();
+
+        EmailVerificationToken token =
+                new EmailVerificationToken();
+
+        token.setToken(
+                verificationToken
+        );
+
+        token.setUser(user);
+
+        token.setExpiryTime(
+                LocalDateTime.now().plusHours(24)
+        );
+
+        token.setVerified(false);
+
+        verificationTokenRepo.save(token);
+
+
+        // ==========================================
+        // SEND EMAIL
+        // ==========================================
+
+        String verificationLink =
+                "http://localhost:5173/verify-email?token="
+                        + verificationToken;
+
+        emailService.sendVerificationEmail(
+                user.getEmail(),
+                user.getName(),
+                verificationLink
+        );
+
+
+        /*
+         * Don't log the user in yet.
+         */
+
+        return new AuthResponse(
+                null,
+                user.getRole().getName().name(),
+                user.getId(),
+                user.getName()
+        );
+    }
+
+    @Transactional
+    public String verifyEmail(String token) {
+
+        EmailVerificationToken verificationToken =
+                verificationTokenRepo
+                        .findByToken(token)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Invalid verification link."
+                                )
+                        );
+
+
+        if (verificationToken.isVerified()) {
+
+            return "Email has already been verified.";
+        }
+
+
+        if (
+                verificationToken
+                        .getExpiryTime()
+                        .isBefore(LocalDateTime.now())
+        ) {
+
+            verificationTokenRepo.delete(
+                    verificationToken
+            );
+
+            throw new RuntimeException(
+                    "Verification link has expired."
+            );
+        }
+
+
+        User user =
+                verificationToken.getUser();
+
+
+        user.setEmailVerified(true);
+
+        userRepo.save(user);
+
+
+        verificationToken.setVerified(true);
+
+        verificationTokenRepo.save(
+                verificationToken
+        );
+
+
+        return "Email verified successfully.";
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -67,6 +201,13 @@ public class AuthService {
 
             throw new RuntimeException(
                     "Your account has been suspended. Please contact support."
+            );
+        }
+
+        if (!user.isEmailVerified()) {
+
+            throw new RuntimeException(
+                    "Please verify your email address before logging in."
             );
         }
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {

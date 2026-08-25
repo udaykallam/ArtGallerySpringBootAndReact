@@ -27,6 +27,8 @@ public class User {
 
     private boolean enabled = true;
 
+    private boolean emailVerified = false;
+
     private String address;
 
     private String city;

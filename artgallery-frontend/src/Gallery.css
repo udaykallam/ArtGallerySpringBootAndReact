@@ -4506,3 +4506,40 @@ img { display: block; max-width: 100%; }
 }
 
 .nav-logo a:hover { opacity: 0.8; }
+
+
+/* ════════════════════════════════════════
+   AUTH — Verify Email Status Icon & Body Text
+   ════════════════════════════════════════ */
+
+.verify-icon {
+  font-size: 48px;
+  margin-bottom: 1rem;
+  line-height: 1;
+  color: var(--gold);
+  opacity: 0.85;
+}
+
+.verify-icon--success {
+  color: #7aab8a; /* sage green, matches confirmed/delivered status elsewhere */
+}
+
+.verify-icon--error {
+  color: #a07070; /* muted red, matches cancelled/delete states elsewhere */
+}
+
+.auth-card .verify-body {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-muted);
+  margin-bottom: 1.75rem;
+}
+
+/* Makes a <Link> render as a full-width centered button,
+   matching .btn-primary's usual <button> appearance */
+.auth-card a.btn-primary {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+}

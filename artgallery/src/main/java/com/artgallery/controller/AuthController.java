@@ -97,4 +97,23 @@ public class AuthController {
                     .body(ex.getMessage());
         }
     }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(
+            @RequestParam String token
+    ) {
+
+        try {
+
+            return ResponseEntity.ok(
+                    authService.verifyEmail(token)
+            );
+
+        } catch (RuntimeException ex) {
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(ex.getMessage());
+        }
+    }
 }

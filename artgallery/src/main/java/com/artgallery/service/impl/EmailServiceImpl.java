@@ -181,4 +181,44 @@ public class EmailServiceImpl implements EmailService {
 
         mailSender.send(message);
     }
+
+    @Override
+    public void sendVerificationEmail(
+            String email,
+            String name,
+            String verificationLink
+    ) {
+
+        SimpleMailMessage message =
+                new SimpleMailMessage();
+
+        message.setTo(email);
+
+        message.setSubject(
+                "Aurelian Gallery | Verify Your Email"
+        );
+
+        message.setText(
+                "Dear " + name + ",\n\n" +
+
+                        "Welcome to Aurelian Gallery.\n\n" +
+
+                        "Thank you for creating your account. " +
+                        "Please verify your email address by clicking " +
+                        "the link below:\n\n" +
+
+                        verificationLink + "\n\n" +
+
+                        "This verification link is valid for 24 hours.\n\n" +
+
+                        "If you did not create this account, " +
+                        "you can safely ignore this email.\n\n" +
+
+                        "Best regards,\n" +
+                        "Aurelian Gallery\n" +
+                        "Art. Elegance. Inspiration."
+        );
+
+        mailSender.send(message);
+    }
 }

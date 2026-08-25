@@ -137,6 +137,7 @@ public class OAuth2LoginSuccessHandler
             user.setPassword("GOOGLE_USER");
 
             user.setEnabled(true);
+            user.setEmailVerified(true);
 
             user.setRole(customerRole);
 

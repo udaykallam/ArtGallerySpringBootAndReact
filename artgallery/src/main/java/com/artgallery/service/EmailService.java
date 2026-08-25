@@ -21,4 +21,10 @@ public interface EmailService {
             String status,
             double totalAmount
     );
+
+    void sendVerificationEmail(
+            String email,
+            String name,
+            String verificationLink
+    );
 }
