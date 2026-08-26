@@ -46,7 +46,7 @@ function LoginPage() {
             else if (role === "ROLE_ARTIST") navigate("/artist/dashboard");
             else navigate("/");
         } catch (error) {
-            toast.error("Invalid email or password. Please try again.");
+            toast.error(error.response?.data?.message || error.response?.data);
             console.error(error.response?.data?.message || error.response?.data);
         }
     };

@@ -27,6 +27,7 @@ public class User {
 
     private boolean enabled = true;
 
+    @Column(nullable = false)
     private boolean emailVerified = false;
 
     private String address;

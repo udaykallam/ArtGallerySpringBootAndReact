@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 import axiosClient from "../../api/axiosClient";
 
 function RegisterPage() {
@@ -17,13 +18,34 @@ function RegisterPage() {
     const [loading, setLoading] =
         useState(false);
 
+    const [resending, setResending] =
+        useState(false);
+
     const [error, setError] =
         useState("");
 
+    const [resendMessage, setResendMessage] =
+        useState("");
+
+    const [resendError, setResendError] =
+        useState("");
+
+
+    // ==========================================
+    // GOOGLE LOGIN
+    // ==========================================
+
     const googleLogin = () => {
+
         window.location.href =
             "http://localhost:8080/oauth2/authorization/google";
+
     };
+
+
+    // ==========================================
+    // FORM CHANGE
+    // ==========================================
 
     const handleChange = (e) => {
 
@@ -33,13 +55,21 @@ function RegisterPage() {
         });
 
         setError("");
+
     };
+
+
+    // ==========================================
+    // REGISTER
+    // ==========================================
 
     const register = async (e) => {
 
         e.preventDefault();
 
         setError("");
+        setResendMessage("");
+        setResendError("");
         setLoading(true);
 
         try {
@@ -50,13 +80,15 @@ function RegisterPage() {
             );
 
             /*
-             * Registration was successful.
+             * Registration successful.
              *
-             * The backend has created the account
-             * and sent the verification email.
+             * The backend creates the account,
+             * creates the verification token,
+             * and sends the verification email.
              */
 
             setRegistered(true);
+            toast.success("Registration successful. Check your email to verify your account.");
 
         } catch (error) {
 
@@ -71,12 +103,71 @@ function RegisterPage() {
                 "Registration failed.";
 
             setError(message);
+            toast.error(message);
 
         } finally {
 
             setLoading(false);
 
         }
+
+    };
+
+
+    // ==========================================
+    // RESEND VERIFICATION EMAIL
+    // ==========================================
+
+    const resendVerification = async () => {
+
+        setResending(true);
+
+        setResendMessage("");
+        setResendError("");
+
+        try {
+
+            const response =
+                await axiosClient.post(
+                    "/auth/resend-verification",
+                    null,
+                    {
+                        params: {
+                            email: formData.email
+                        }
+                    }
+                );
+
+            setResendMessage(
+                response.data ||
+                "Verification email sent successfully."
+            );
+            toast.success(
+                response.data ||
+                "Verification email sent successfully."
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Resend verification error:",
+                error
+            );
+
+            const message =
+                error.response?.data?.message ||
+                error.response?.data ||
+                "Failed to resend verification email.";
+
+            setResendError(message);
+            toast.error(message);
+
+        } finally {
+
+            setResending(false);
+
+        }
+
     };
 
 
@@ -87,6 +178,7 @@ function RegisterPage() {
     if (registered) {
 
         return (
+
             <div className="auth-page">
 
                 <div className="auth-card">
@@ -95,86 +187,115 @@ function RegisterPage() {
                         Aurelian Gallery
                     </div>
 
-                    <div
-                        style={{
-                            fontSize: "52px",
-                            marginBottom: "15px"
-                        }}
-                    >
+
+                    <div className="verify-icon">
                         ✉
                     </div>
+
 
                     <h2>
                         Check Your Email
                     </h2>
+
 
                     <p className="auth-tagline">
                         We've sent a verification link
                         to your email address.
                     </p>
 
+
                     <div className="auth-divider" />
 
-                    <p
-                        style={{
-                            lineHeight: "1.7",
-                            color: "#aaa",
-                            marginBottom: "25px"
-                        }}
-                    >
+
+                    <p className="verify-body">
                         Please check your inbox and
                         click the verification link to
                         activate your Aurelian Gallery
                         account.
                     </p>
 
-                    <p
-                        style={{
-                            fontSize: "14px",
-                            color: "#777",
-                            marginBottom: "25px"
-                        }}
-                    >
+
+                    <p className="verify-note">
                         The verification link is valid
                         for 24 hours.
                     </p>
 
+
                     <Link
                         to="/login"
                         className="btn-primary"
-                        style={{
-                            display: "block",
-                            textAlign: "center",
-                            textDecoration: "none"
-                        }}
                     >
                         Go to Login
                     </Link>
 
-                    <p
-                        className="auth-footer-link"
-                        style={{
-                            marginTop: "20px"
-                        }}
-                    >
+
+                    {/* =========================
+                        RESEND VERIFICATION
+                    ========================= */}
+
+                    <p className="auth-footer-link">
                         Didn't receive the email?
                     </p>
 
-                    <p
-                        style={{
-                            fontSize: "13px",
-                            color: "#777"
-                        }}
+
+                    <button
+                        type="button"
+                        className="btn-view"
+                        onClick={resendVerification}
+                        disabled={resending}
                     >
-                        Check your spam or junk folder.
+
+                        {resending
+                            ? "Sending..."
+                            : "Resend Verification Email"
+                        }
+
+                    </button>
+
+
+                    {/* =========================
+                        RESEND SUCCESS
+                    ========================= */}
+
+                    {resendMessage && (
+
+                        <p className="verify-success">
+                            {resendMessage}
+                        </p>
+
+                    )}
+
+
+                    {/* =========================
+                        RESEND ERROR
+                    ========================= */}
+
+                    {resendError && (
+
+                        <p className="auth-error">
+                            {resendError}
+                        </p>
+
+                    )}
+
+
+                    <p className="verify-note">
+                        Check your spam or junk folder
+                        if you still don't see the email.
                     </p>
 
                 </div>
 
             </div>
+
         );
+
     }
 
+
+    // ==========================================
+    // REGISTRATION FORM
+    // ==========================================
 
     return (
 
@@ -186,32 +307,27 @@ function RegisterPage() {
                     Aurelian Gallery
                 </div>
 
+
                 <h2>
                     Join the Collection
                 </h2>
+
 
                 <p className="auth-tagline">
                     Create your private account
                 </p>
 
+
                 <div className="auth-divider" />
 
 
-                {/* ERROR */}
+                {/* =========================
+                    ERROR
+                ========================= */}
 
                 {error && (
 
-                    <div
-                        style={{
-                            padding: "12px 15px",
-                            marginBottom: "20px",
-                            borderRadius: "6px",
-                            background: "rgba(180, 60, 60, 0.12)",
-                            border: "1px solid rgba(180, 60, 60, 0.3)",
-                            color: "#d98c8c",
-                            fontSize: "14px"
-                        }}
-                    >
+                    <div className="auth-error">
                         {error}
                     </div>
 
@@ -220,7 +336,10 @@ function RegisterPage() {
 
                 <form onSubmit={register}>
 
-                    {/* NAME */}
+
+                    {/* =========================
+                        NAME
+                    ========================= */}
 
                     <div className="field-wrap">
 
@@ -241,7 +360,9 @@ function RegisterPage() {
                     </div>
 
 
-                    {/* EMAIL */}
+                    {/* =========================
+                        EMAIL
+                    ========================= */}
 
                     <div className="field-wrap">
 
@@ -262,7 +383,9 @@ function RegisterPage() {
                     </div>
 
 
-                    {/* PHONE */}
+                    {/* =========================
+                        PHONE
+                    ========================= */}
 
                     <div className="field-wrap">
 
@@ -283,7 +406,9 @@ function RegisterPage() {
                     </div>
 
 
-                    {/* PASSWORD */}
+                    {/* =========================
+                        PASSWORD
+                    ========================= */}
 
                     <div className="field-wrap">
 
@@ -304,7 +429,9 @@ function RegisterPage() {
                     </div>
 
 
-                    {/* REGISTER */}
+                    {/* =========================
+                        REGISTER BUTTON
+                    ========================= */}
 
                     <button
                         type="submit"
@@ -314,12 +441,15 @@ function RegisterPage() {
 
                         {loading
                             ? "Creating Account..."
-                            : "Create Account"}
+                            : "Create Account"
+                        }
 
                     </button>
 
 
-                    {/* DIVIDER */}
+                    {/* =========================
+                        DIVIDER
+                    ========================= */}
 
                     <div className="auth-divider-row">
 
@@ -334,7 +464,9 @@ function RegisterPage() {
                     </div>
 
 
-                    {/* GOOGLE */}
+                    {/* =========================
+                        GOOGLE
+                    ========================= */}
 
                     <button
                         type="button"
@@ -354,6 +486,10 @@ function RegisterPage() {
                 </form>
 
 
+                {/* =========================
+                    LOGIN LINK
+                ========================= */}
+
                 <p className="auth-footer-link">
 
                     Already a member?{" "}
@@ -367,6 +503,7 @@ function RegisterPage() {
             </div>
 
         </div>
+
     );
 }
 

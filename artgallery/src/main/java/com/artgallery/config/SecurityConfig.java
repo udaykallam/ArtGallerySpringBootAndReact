@@ -50,7 +50,8 @@ public class SecurityConfig {
                                 "/api/auth/forgot-password",
                                 "/api/auth/verify-otp",
                                 "/api/auth/reset-password",
-                                "/api/auth/verify-email"
+                                "/api/auth/verify-email",
+                                "/api/auth/resend-verification"
                         ).permitAll()
 
                         // Google OAuth

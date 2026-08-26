@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
 import { getArtworkById, updateArtwork } from "../../services/artistService";
 
 function EditArtwork() {
@@ -28,7 +29,7 @@ function EditArtwork() {
                 framed:        artwork.framed        || false,
             });
         } catch (error) {
-            alert("Failed to load artwork");
+            toast.error("Failed to load artwork");
         } finally {
             setLoading(false);
         }
@@ -43,10 +44,10 @@ function EditArtwork() {
         e.preventDefault();
         try {
             await updateArtwork(id, formData);
-            alert("Artwork updated successfully");
+            toast.success("Artwork updated successfully");
             navigate("/artist/artworks");
         } catch (error) {
-            alert(error.response?.data?.message || "Update failed");
+            toast.error(error.response?.data?.message || "Update failed");
         }
     };
 

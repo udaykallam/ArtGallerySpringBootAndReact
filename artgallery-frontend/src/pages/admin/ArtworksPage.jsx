@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
     getAdminArtworks,
     featureArtwork,
@@ -33,7 +34,7 @@ function ArtworksPage() {
             else await featureArtwork(artwork.id);
             loadArtworks();
         } catch (error) {
-            alert("Operation failed");
+            toast.error("Operation failed");
         } finally {
             setActingId(null);
         }
@@ -47,7 +48,7 @@ function ArtworksPage() {
             await overridePrice(artwork.id, Number(price));
             loadArtworks();
         } catch (error) {
-            alert("Failed");
+            toast.error("Failed");
         } finally {
             setActingId(null);
         }
@@ -60,7 +61,7 @@ function ArtworksPage() {
             await removeArtwork(id);
             loadArtworks();
         } catch (error) {
-            alert("Delete failed");
+            toast.error("Delete failed");
         } finally {
             setActingId(null);
         }

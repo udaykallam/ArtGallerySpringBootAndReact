@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { getCategories, createCategory, updateCategory, deleteCategory } from "../../services/adminService";
 
 function CategoriesPage() {
@@ -40,7 +41,7 @@ function CategoriesPage() {
             resetForm();
             loadCategories();
         } catch (error) {
-            alert(error.response?.data || "Operation failed");
+            toast.error(error.response?.data || "Operation failed");
         }
     };
 
@@ -57,7 +58,7 @@ function CategoriesPage() {
             await deleteCategory(id);
             loadCategories();
         } catch (error) {
-            alert(error.response?.data || "Delete failed");
+            toast.error(error.response?.data || "Delete failed");
         } finally {
             setDeletingId(null);
         }

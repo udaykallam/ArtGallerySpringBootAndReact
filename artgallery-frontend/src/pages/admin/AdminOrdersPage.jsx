@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { getAdminOrders, updateOrderStatus } from "../../services/adminService";
 
 function AdminOrdersPage() {
@@ -26,7 +27,7 @@ function AdminOrdersPage() {
             await updateOrderStatus(orderId, status);
             loadOrders();
         } catch (error) {
-            alert("Failed to update order");
+            toast.error("Failed to update order");
         } finally {
             setUpdatingId(null);
         }

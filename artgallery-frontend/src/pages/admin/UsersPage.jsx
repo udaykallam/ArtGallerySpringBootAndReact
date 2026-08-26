@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { getUsers, blockUser, activateUser, deleteUser } from "../../services/adminService";
 
 function UsersPage() {
@@ -27,7 +28,7 @@ function UsersPage() {
             await blockUser(id);
             loadUsers();
         } catch (error) {
-            alert("Operation failed");
+            toast.error("Operation failed");
         } finally {
             setActingId(null);
         }
@@ -39,7 +40,7 @@ function UsersPage() {
             await activateUser(id);
             loadUsers();
         } catch (error) {
-            alert("Operation failed");
+            toast.error("Operation failed");
         } finally {
             setActingId(null);
         }
@@ -52,7 +53,7 @@ function UsersPage() {
             await deleteUser(id);
             loadUsers();
         } catch (error) {
-            alert("Delete failed");
+            toast.error("Delete failed");
         } finally {
             setActingId(null);
         }

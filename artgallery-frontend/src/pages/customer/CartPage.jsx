@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import axiosClient from "../../api/axiosClient";
 import { getCart, removeFromCart, updateCartQuantity } from "../../services/commerceService";
 
@@ -30,7 +31,7 @@ function CartPage() {
                 error.response?.data || error
             );
 
-            alert(
+            toast.error(
                 error.response?.data?.message ||
                 error.response?.data ||
                 "Failed to load cart"
@@ -48,7 +49,7 @@ function CartPage() {
             await removeFromCart(artworkId);
             await loadCart();
         } catch (error) {
-            alert(error.response?.data?.message || "Failed to remove item");
+            toast.error(error.response?.data?.message || "Failed to remove item");
         }
     };
 
@@ -56,13 +57,13 @@ function CartPage() {
         const stock = item.artwork?.stock || 0;
         const newQty = item.quantity + delta;
         if (newQty < 1) return;
-        if (newQty > stock) { alert(`Only ${stock} item(s) available`); return; }
+        if (newQty > stock) { toast.error(`Only ${stock} item(s) available`); return; }
         setUpdatingId(item.id);
         try {
             await updateCartQuantity(item.artwork.id, newQty);
             await loadCart();
         } catch (error) {
-            alert(error.response?.data?.message || error.message);
+            toast.error(error.response?.data?.message || error.message);
         } finally {
             setUpdatingId(null);
         }
@@ -70,14 +71,14 @@ function CartPage() {
 
     const checkout = async () => {
         const invalidItem = cart.find(item => item.quantity > (item.artwork?.stock || 0));
-        if (invalidItem) { alert(`${invalidItem.artwork.title} exceeds available stock`); return; }
+        if (invalidItem) { toast.error(`${invalidItem.artwork.title} exceeds available stock`); return; }
         try {
             const response = await axiosClient.post("/orders/checkout");
-            alert(`Order #${response.data.orderId} created successfully`);
+            toast.success(`Order #${response.data.orderId} created successfully`);
             await loadCart();
             navigate("/orders");
         } catch (error) {
-            alert(error.response?.data?.message || error.message);
+            toast.error(error.response?.data?.message || error.message);
         }
     };
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 import axiosClient from "../../api/axiosClient";
 
 function OrdersPage() {
@@ -14,7 +15,7 @@ function OrdersPage() {
             setOrders(response.data);
         } catch (error) {
             console.error(error);
-            alert(error.response?.data?.message || "Failed to load orders");
+            toast.error(error.response?.data?.message || "Failed to load orders");
         } finally {
             setLoading(false);
         }

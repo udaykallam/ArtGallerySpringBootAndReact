@@ -4,19 +4,16 @@ import axiosClient from "../../api/axiosClient";
 
 function VerifyEmailPage() {
 
-    const [searchParams] =
-        useSearchParams();
+    const [searchParams] = useSearchParams();
 
-    const [status, setStatus] =
-        useState("verifying");
+    const [status, setStatus] = useState("verifying");
 
-    const [message, setMessage] =
-        useState("");
+    const [message, setMessage] = useState("");
+
 
     useEffect(() => {
 
-        const token =
-            searchParams.get("token");
+        const token = searchParams.get("token");
 
         if (!token) {
 
@@ -72,12 +69,18 @@ function VerifyEmailPage() {
             setMessage(errorMessage);
 
         }
+
     };
 
+
+    // ==========================================
+    // VERIFYING
+    // ==========================================
 
     if (status === "verifying") {
 
         return (
+
             <div className="auth-page">
 
                 <div className="auth-card">
@@ -102,13 +105,19 @@ function VerifyEmailPage() {
                 </div>
 
             </div>
+
         );
     }
 
 
+    // ==========================================
+    // SUCCESS
+    // ==========================================
+
     if (status === "success") {
 
         return (
+
             <div className="auth-page">
 
                 <div className="auth-card">
@@ -147,11 +156,17 @@ function VerifyEmailPage() {
                 </div>
 
             </div>
+
         );
     }
 
 
+    // ==========================================
+    // ERROR
+    // ==========================================
+
     return (
+
         <div className="auth-page">
 
             <div className="auth-card">
@@ -188,6 +203,7 @@ function VerifyEmailPage() {
             </div>
 
         </div>
+
     );
 }
 

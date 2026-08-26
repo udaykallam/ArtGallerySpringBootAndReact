@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -115,5 +116,15 @@ public class AuthController {
                     .badRequest()
                     .body(ex.getMessage());
         }
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<String> resendVerificationEmail(
+            @RequestParam String email
+    ) {
+
+        return ResponseEntity.ok(
+                authService.resendVerificationEmail(email)
+        );
     }
 }

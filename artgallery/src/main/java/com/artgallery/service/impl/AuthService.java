@@ -13,13 +13,15 @@ import com.artgallery.repository.PasswordResetOtpRepository;
 import com.artgallery.repository.RoleRepository;
 import com.artgallery.repository.UserRepository;
 import com.artgallery.service.EmailService;
+
 import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import java.util.UUID;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -30,6 +32,8 @@ public class AuthService {
     @Autowired
     private RoleRepository roleRepo;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private JwtService jwtService;
@@ -38,17 +42,20 @@ public class AuthService {
     private PasswordResetOtpRepository otpRepo;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private EmailVerificationTokenRepository verificationTokenRepo;
 
     @Autowired
     private EmailService emailService;
 
-    @Autowired
-    private EmailVerificationTokenRepository verificationTokenRepo;
+
+    // =========================================================
+    // REGISTER
+    // =========================================================
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
 
+        // Check whether email already exists
         if (userRepo.findByEmail(request.getEmail()).isPresent()) {
 
             throw new RuntimeException(
@@ -56,16 +63,28 @@ public class AuthService {
             );
         }
 
+
+        // Get CUSTOMER role
         Role role =
                 roleRepo.findByName(
                         RoleName.ROLE_CUSTOMER
-                ).orElseThrow();
+                ).orElseThrow(() ->
+                        new RuntimeException(
+                                "Customer role not found."
+                        )
+                );
 
+
+        // Create user
         User user = new User();
 
-        user.setName(request.getName());
+        user.setName(
+                request.getName()
+        );
 
-        user.setEmail(request.getEmail());
+        user.setEmail(
+                request.getEmail()
+        );
 
         user.setPassword(
                 passwordEncoder.encode(
@@ -77,18 +96,16 @@ public class AuthService {
                 request.getPhone()
         );
 
-        // Account is active but email is not verified.
+        // Account is active,
+        // but email is not verified yet.
         user.setEnabled(true);
+
         user.setEmailVerified(false);
 
         user.setRole(role);
 
+
         userRepo.save(user);
-
-
-        // ==========================================
-        // CREATE VERIFICATION TOKEN
-        // ==========================================
 
         String verificationToken =
                 UUID.randomUUID().toString();
@@ -96,24 +113,14 @@ public class AuthService {
         EmailVerificationToken token =
                 new EmailVerificationToken();
 
-        token.setToken(
-                verificationToken
-        );
-
+        token.setToken(verificationToken);
         token.setUser(user);
-
         token.setExpiryTime(
                 LocalDateTime.now().plusHours(24)
         );
-
         token.setVerified(false);
 
         verificationTokenRepo.save(token);
-
-
-        // ==========================================
-        // SEND EMAIL
-        // ==========================================
 
         String verificationLink =
                 "http://localhost:5173/verify-email?token="
@@ -126,9 +133,9 @@ public class AuthService {
         );
 
 
-        /*
-         * Don't log the user in yet.
-         */
+        // =====================================================
+        // DO NOT LOGIN USER YET
+        // =====================================================
 
         return new AuthResponse(
                 null,
@@ -137,6 +144,11 @@ public class AuthService {
                 user.getName()
         );
     }
+
+
+    // =========================================================
+    // VERIFY EMAIL
+    // =========================================================
 
     @Transactional
     public String verifyEmail(String token) {
@@ -151,16 +163,20 @@ public class AuthService {
                         );
 
 
+        // Already verified
         if (verificationToken.isVerified()) {
 
             return "Email has already been verified.";
         }
 
 
+        // Check expiry
         if (
                 verificationToken
                         .getExpiryTime()
-                        .isBefore(LocalDateTime.now())
+                        .isBefore(
+                                LocalDateTime.now()
+                        )
         ) {
 
             verificationTokenRepo.delete(
@@ -173,15 +189,18 @@ public class AuthService {
         }
 
 
+        // Get user
         User user =
                 verificationToken.getUser();
 
 
+        // Mark email verified
         user.setEmailVerified(true);
 
         userRepo.save(user);
 
 
+        // Mark token verified
         verificationToken.setVerified(true);
 
         verificationTokenRepo.save(
@@ -192,61 +211,241 @@ public class AuthService {
         return "Email verified successfully.";
     }
 
-    public AuthResponse login(LoginRequest request) {
 
-        User user = userRepo.findByEmail(request.getEmail())
-                .orElseThrow();
+    // =========================================================
+    // RESEND VERIFICATION EMAIL
+    // =========================================================
 
+    @Transactional
+    public String resendVerificationEmail(String email) {
+
+        User user =
+                userRepo.findByEmail(email)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "No account found with this email."
+                                )
+                        );
+
+        // Email already verified
+        if (user.isEmailVerified()) {
+
+            throw new RuntimeException(
+                    "Your email is already verified."
+            );
+        }
+
+
+        // =====================================================
+        // FIND EXISTING TOKEN
+        // =====================================================
+
+        EmailVerificationToken token =
+                verificationTokenRepo
+                        .findByUser(user)
+                        .orElse(null);
+
+
+        // =====================================================
+        // CREATE TOKEN ONLY IF ONE DOES NOT EXIST
+        // =====================================================
+
+        if (token == null) {
+
+            token =
+                    new EmailVerificationToken();
+
+            token.setUser(user);
+
+        }
+
+
+        // =====================================================
+        // GENERATE NEW TOKEN
+        // =====================================================
+
+        String newVerificationToken =
+                UUID.randomUUID().toString();
+
+        token.setToken(
+                newVerificationToken
+        );
+
+        token.setExpiryTime(
+                LocalDateTime.now().plusHours(24)
+        );
+
+        token.setVerified(false);
+
+
+        // =====================================================
+        // SAVE
+        // =====================================================
+
+        verificationTokenRepo.save(
+                token
+        );
+
+
+        // =====================================================
+        // SEND EMAIL
+        // =====================================================
+
+        String verificationLink =
+                "http://localhost:5173/verify-email?token="
+                        + newVerificationToken;
+
+
+        emailService.sendVerificationEmail(
+                user.getEmail(),
+                user.getName(),
+                verificationLink
+        );
+
+
+        return "Verification email sent successfully.";
+    }
+
+
+    // =========================================================
+    // LOGIN
+    // =========================================================
+
+    public AuthResponse login(
+            LoginRequest request
+    ) {
+
+        User user =
+                userRepo.findByEmail(
+                        request.getEmail()
+                ).orElseThrow(() ->
+                        new RuntimeException(
+                                "User not found"
+                        )
+                );
+
+
+        // Account suspended
         if (!user.isEnabled()) {
 
             throw new RuntimeException(
-                    "Your account has been suspended. Please contact support."
+                    "Your account has been suspended. " +
+                            "Please contact support."
             );
         }
 
+
+        // Email not verified
         if (!user.isEmailVerified()) {
 
             throw new RuntimeException(
-                    "Please verify your email address before logging in."
+                    "Please verify your email address " +
+                            "before logging in."
             );
         }
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+
+
+        // Check password
+        if (
+                !passwordEncoder.matches(
+                        request.getPassword(),
+                        user.getPassword()
+                )
+        ) {
+
+            throw new RuntimeException(
+                    "Invalid credentials"
+            );
         }
 
-        String token = jwtService.generateToken(user.getEmail());
-        return new AuthResponse(token,user.getRole().getName().name(),user.getId(),user.getName());
+
+        // Generate JWT
+        String token =
+                jwtService.generateToken(
+                        user.getEmail()
+                );
+
+
+        return new AuthResponse(
+                token,
+                user.getRole().getName().name(),
+                user.getId(),
+                user.getName()
+        );
     }
 
+
+    // =========================================================
+    // FORGOT PASSWORD - SEND OTP
+    // =========================================================
+
     @Transactional
-    public String sendOtp(String email) {
+    public String sendOtp(
+            String email
+    ) {
 
-        User user = userRepo.findByEmail(email)
-                .orElseThrow(() ->
-                        new RuntimeException("No account found with this email."));
+        User user =
+                userRepo.findByEmail(email)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "No account found with this email."
+                                )
+                        );
 
-        if (user == null) {
-            throw new RuntimeException("No account found with this email.");
-        }
 
-        otpRepo.deleteByEmail(email);
+        // Delete previous OTP
+        otpRepo.deleteByEmail(
+                email
+        );
 
-        String otp = String.format("%06d",
-                new java.util.Random().nextInt(999999));
 
-        PasswordResetOtp token = new PasswordResetOtp();
+        // Generate 6-digit OTP
+        String otp =
+                String.format(
+                        "%06d",
+                        new java.util.Random()
+                                .nextInt(1_000_000)
+                );
 
-        token.setEmail(email);
-        token.setOtp(otp);
-        token.setExpiryTime(LocalDateTime.now().plusMinutes(5));
+
+        PasswordResetOtp token =
+                new PasswordResetOtp();
+
+        token.setEmail(
+                email
+        );
+
+        token.setOtp(
+                otp
+        );
+
+        token.setExpiryTime(
+                LocalDateTime.now()
+                        .plusMinutes(5)
+        );
+
         token.setVerified(false);
 
-        otpRepo.save(token);
 
-        emailService.sendOtp(email, otp);
+        otpRepo.save(
+                token
+        );
+
+
+        // Send password reset email
+        emailService.sendOtp(
+                email,
+                otp
+        );
+
 
         return "OTP sent successfully.";
     }
+
+
+    // =========================================================
+    // VERIFY PASSWORD RESET OTP
+    // =========================================================
 
     public String verifyOtp(
             String email,
@@ -254,23 +453,48 @@ public class AuthService {
     ) {
 
         PasswordResetOtp token =
-                otpRepo.findByEmailAndOtp(email, otp)
-                        .orElseThrow(() ->
-                                new RuntimeException("Invalid OTP"));
+                otpRepo.findByEmailAndOtp(
+                        email,
+                        otp
+                ).orElseThrow(() ->
+                        new RuntimeException(
+                                "Invalid OTP"
+                        )
+                );
 
-        if (token.getExpiryTime().isBefore(LocalDateTime.now())) {
 
-            otpRepo.delete(token);
+        // Check expiry
+        if (
+                token.getExpiryTime()
+                        .isBefore(
+                                LocalDateTime.now()
+                        )
+        ) {
 
-            throw new RuntimeException("OTP has expired.");
+            otpRepo.delete(
+                    token
+            );
+
+            throw new RuntimeException(
+                    "OTP has expired."
+            );
         }
+
 
         token.setVerified(true);
 
-        otpRepo.save(token);
+        otpRepo.save(
+                token
+        );
+
 
         return "OTP verified successfully.";
     }
+
+
+    // =========================================================
+    // RESET PASSWORD
+    // =========================================================
 
     @Transactional
     public String resetPassword(
@@ -279,28 +503,57 @@ public class AuthService {
     ) {
 
         PasswordResetOtp token =
-                otpRepo.findByEmail(email)
-                        .orElseThrow(() ->
-                                new RuntimeException("OTP not found"));
+                otpRepo.findByEmail(
+                        email
+                ).orElseThrow(() ->
+                        new RuntimeException(
+                                "OTP not found"
+                        )
+                );
 
+
+        // OTP must be verified first
         if (!token.isVerified()) {
-            throw new RuntimeException("Please verify OTP first.");
+
+            throw new RuntimeException(
+                    "Please verify OTP first."
+            );
         }
 
-        User user = userRepo.findByEmail(email)
-                .orElseThrow(() ->
-                        new RuntimeException("No account found with this email."));
+
+        User user =
+                userRepo.findByEmail(
+                        email
+                ).orElseThrow(() ->
+                        new RuntimeException(
+                                "No account found with this email."
+                        )
+                );
+
 
         user.setPassword(
-                passwordEncoder.encode(newPassword)
+                passwordEncoder.encode(
+                        newPassword
+                )
         );
+
 
         userRepo.save(user);
 
-        otpRepo.delete(token);
+
+        // Delete used OTP
+        otpRepo.delete(
+                token
+        );
+
 
         return "Password reset successful.";
     }
+
+
+    // =========================================================
+    // CHANGE PASSWORD
+    // =========================================================
 
     @Transactional
     public String changePassword(
@@ -310,11 +563,17 @@ public class AuthService {
             String confirmPassword
     ) {
 
-        User user = userRepo.findByEmail(email)
-                .orElseThrow(() ->
-                        new RuntimeException("User not found.")
+        User user =
+                userRepo.findByEmail(
+                        email
+                ).orElseThrow(() ->
+                        new RuntimeException(
+                                "User not found."
+                        )
                 );
 
+
+        // Check account status
         if (!user.isEnabled()) {
 
             throw new RuntimeException(
@@ -322,49 +581,69 @@ public class AuthService {
             );
         }
 
+
         // Check current password
-        if (!passwordEncoder.matches(
-                currentPassword,
-                user.getPassword()
-        )) {
+        if (
+                !passwordEncoder.matches(
+                        currentPassword,
+                        user.getPassword()
+                )
+        ) {
 
             throw new RuntimeException(
                     "Current password is incorrect."
             );
         }
 
-        // Check new password confirmation
-        if (!newPassword.equals(confirmPassword)) {
+
+        // Check confirmation
+        if (
+                !newPassword.equals(
+                        confirmPassword
+                )
+        ) {
 
             throw new RuntimeException(
                     "New passwords do not match."
             );
         }
 
-        // Don't allow the same password
-        if (passwordEncoder.matches(
-                newPassword,
-                user.getPassword()
-        )) {
+
+        // Don't allow same password
+        if (
+                passwordEncoder.matches(
+                        newPassword,
+                        user.getPassword()
+                )
+        ) {
 
             throw new RuntimeException(
-                    "New password must be different from your current password."
+                    "New password must be different " +
+                            "from your current password."
             );
         }
 
+
         // Basic password validation
-        if (newPassword.length() < 8) {
+        if (
+                newPassword.length() < 8
+        ) {
 
             throw new RuntimeException(
                     "New password must contain at least 8 characters."
             );
         }
 
+
+        // Save new password
         user.setPassword(
-                passwordEncoder.encode(newPassword)
+                passwordEncoder.encode(
+                        newPassword
+                )
         );
 
         userRepo.save(user);
+
 
         return "Password changed successfully.";
     }
