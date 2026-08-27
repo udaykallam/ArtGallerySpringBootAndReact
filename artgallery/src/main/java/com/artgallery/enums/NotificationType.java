@@ -6,5 +6,6 @@ public enum NotificationType {
     REVIEW,
     ARTWORK,
     SYSTEM,
-    PROMOTION
+    PROMOTION,
+    ANNOUNCEMENT
 }

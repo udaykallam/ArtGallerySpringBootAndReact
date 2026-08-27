@@ -190,6 +190,10 @@ function Navbar() {
                             Orders
                         </Link>
 
+                        <Link to="/admin/announcements">
+                            Announcements
+                        </Link>
+
                     </>
 
                 )}

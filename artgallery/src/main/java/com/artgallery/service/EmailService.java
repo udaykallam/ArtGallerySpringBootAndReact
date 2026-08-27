@@ -27,4 +27,11 @@ public interface EmailService {
             String name,
             String verificationLink
     );
+
+    void sendAnnouncementEmail(
+            String email,
+            String name,
+            String title,
+            String message
+    );
 }

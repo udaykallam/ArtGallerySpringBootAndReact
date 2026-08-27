@@ -29,6 +29,7 @@ import ProfilePage from "./pages/profile/ProfilePage";
 import ChangePasswordPage from "./pages/auth/ChangePasswordPage";
 import SettingsPage from "./pages/customer/SettingsPage";
 import VerifyEmailPage from "./pages/auth/VerifyEmailPage";
+import AdminAnnouncementsPage from "./pages/admin/AdminAnnouncementsPage";
 
 
 function App() {
@@ -231,6 +232,11 @@ function App() {
                 <Route
                     path="/admin/orders"
                     element={<AdminOrdersPage />}
+                />
+
+                <Route
+                    path="/admin/announcements"
+                    element={<AdminAnnouncementsPage />}
                 />
 
             </Routes>
