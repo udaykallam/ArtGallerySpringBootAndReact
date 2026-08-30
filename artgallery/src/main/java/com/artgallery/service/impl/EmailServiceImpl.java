@@ -6,6 +6,7 @@ import jakarta.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -1009,5 +1010,155 @@ public class EmailServiceImpl implements EmailService {
 
         return escapeHtml(message)
                 .replace("\n", "<br>");
+    }
+
+    // =====================================================
+// ACCOUNT REACTIVATION OTP
+// =====================================================
+
+    @Override
+    public void sendAccountReactivationOtp(
+            String email,
+            String name,
+            String otp
+    ) {
+
+        String content = """
+
+            <div
+                style="
+                    font-size:12px;
+                    letter-spacing:2px;
+                    text-transform:uppercase;
+                    color:#a47a3c;
+                    margin-bottom:12px;
+                "
+            >
+                Account Security
+            </div>
+
+
+            <h1
+                style="
+                    margin:0 0 20px 0;
+                    color:#27332d;
+                    font-size:28px;
+                    font-weight:500;
+                "
+            >
+                Reactivate Your Account
+            </h1>
+
+
+            <p>
+                Dear <strong>%s</strong>,
+            </p>
+
+
+            <p>
+                We received a request to reactivate your
+                Aurelian Gallery account.
+            </p>
+
+
+            <p>
+                To confirm that you are the account owner,
+                please enter the One-Time Password below.
+            </p>
+
+
+            <!-- OTP CARD -->
+
+            <div
+                style="
+                    margin:30px 0;
+                    padding:24px 20px;
+                    background:#ffffff;
+                    border:1px solid #deded7;
+                    text-align:center;
+                "
+            >
+
+                <div
+                    style="
+                        font-size:11px;
+                        letter-spacing:2px;
+                        text-transform:uppercase;
+                        color:#737a75;
+                        margin-bottom:12px;
+                    "
+                >
+                    Reactivation Code
+                </div>
+
+
+                <div
+                    style="
+                        font-size:32px;
+                        letter-spacing:8px;
+                        font-weight:bold;
+                        color:#8b662f;
+                    "
+                >
+                    %s
+                </div>
+
+            </div>
+
+
+            <!-- INFORMATION BOX -->
+
+            <div
+                style="
+                    background:#eeeee8;
+                    border-left:4px solid #b58a45;
+                    padding:18px 20px;
+                    margin:25px 0;
+                    color:#3f4742;
+                    line-height:1.7;
+                "
+            >
+
+                This verification code is valid for
+                <strong>5 minutes</strong>.
+
+                <br><br>
+
+                For your security, please do not share
+                this code with anyone.
+
+            </div>
+
+
+            <p>
+                Once the OTP is successfully verified,
+                your account will be reactivated and you
+                can sign in to Aurelian Gallery again.
+            </p>
+
+
+            <p>
+                If you did not request to reactivate your
+                account, you can safely ignore this email.
+                Your account will remain deactivated.
+            </p>
+
+
+            <p style="margin-top:30px;">
+                Warm regards,<br>
+                <strong>Aurelian Gallery</strong>
+            </p>
+
+            """.formatted(
+                escapeHtml(name),
+                escapeHtml(otp)
+        );
+
+
+        sendHtmlEmail(
+                email,
+                "Aurelian Gallery | Account Reactivation OTP",
+                emailTemplate(content)
+        );
     }
 }

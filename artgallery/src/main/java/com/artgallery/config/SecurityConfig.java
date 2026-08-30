@@ -51,7 +51,9 @@ public class SecurityConfig {
                                 "/api/auth/verify-otp",
                                 "/api/auth/reset-password",
                                 "/api/auth/verify-email",
-                                "/api/auth/resend-verification"
+                                "/api/auth/resend-verification",
+                                "/api/auth/send-reactivation-otp",
+                                "/api/auth/reactivate-account"
                         ).permitAll()
 
                         // Google OAuth

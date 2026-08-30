@@ -34,4 +34,10 @@ public interface EmailService {
             String title,
             String message
     );
+
+    void sendAccountReactivationOtp(
+            String email,
+            String name,
+            String otp
+    );
 }

@@ -1,7 +1,10 @@
 package com.artgallery.controller;
 
 import com.artgallery.dto.*;
+import com.artgallery.service.impl.AccountDeactivatedException;
 import com.artgallery.service.impl.AuthService;
+import com.artgallery.service.impl.AccountReactivationService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,15 +19,85 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private AccountReactivationService
+            accountReactivationService;
+
+
+    // =========================================================
+    // REGISTER
+    // =========================================================
+
     @PostMapping("/register")
-    public AuthResponse register(@RequestBody RegisterRequest request) {
+    public AuthResponse register(
+            @RequestBody RegisterRequest request
+    ) {
+
         return authService.register(request);
     }
 
+
+    // =========================================================
+    // LOGIN
+    // =========================================================
+
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody LoginRequest request) {
-        return authService.login(request);
+    public ResponseEntity<?> login(
+            @RequestBody LoginRequest request
+    ) {
+
+        try {
+
+            return ResponseEntity.ok(
+                    authService.login(request)
+            );
+
+        } catch (
+                AccountDeactivatedException ex
+        ) {
+
+            /*
+             * IMPORTANT:
+             *
+             * Do NOT send the reactivation OTP here.
+             *
+             * React will first show:
+             *
+             * "Your account is deactivated.
+             *  Would you like to reactivate?"
+             *
+             * The OTP will only be generated after
+             * the user clicks YES.
+             */
+
+            return ResponseEntity
+                    .status(403)
+                    .body(
+                            Map.of(
+                                    "status",
+                                    "REACTIVATION_REQUIRED",
+
+                                    "message",
+                                    ex.getMessage()
+                            )
+                    );
+
+        } catch (RuntimeException ex) {
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(
+                            Map.of(
+                                    "message",
+                                    ex.getMessage()
+                            )
+                    );
+        }
     }
+
+    // =========================================================
+    // FORGOT PASSWORD
+    // =========================================================
 
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(
@@ -43,36 +116,74 @@ public class AuthController {
 
             return ResponseEntity
                     .badRequest()
-                    .body(ex.getMessage());
-
+                    .body(
+                            ex.getMessage()
+                    );
         }
     }
+
+
+    // =========================================================
+    // VERIFY PASSWORD RESET OTP
+    // =========================================================
 
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(
             @RequestBody VerifyOtpRequest request
     ) {
 
-        return ResponseEntity.ok(
-                authService.verifyOtp(
-                        request.getEmail(),
-                        request.getOtp()
-                )
-        );
+        try {
+
+            return ResponseEntity.ok(
+                    authService.verifyOtp(
+                            request.getEmail(),
+                            request.getOtp()
+                    )
+            );
+
+        } catch (RuntimeException ex) {
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(
+                            ex.getMessage()
+                    );
+        }
     }
+
+
+    // =========================================================
+    // RESET PASSWORD
+    // =========================================================
 
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(
             @RequestBody ResetPasswordRequest request
     ) {
 
-        return ResponseEntity.ok(
-                authService.resetPassword(
-                        request.getEmail(),
-                        request.getNewPassword()
-                )
-        );
+        try {
+
+            return ResponseEntity.ok(
+                    authService.resetPassword(
+                            request.getEmail(),
+                            request.getNewPassword()
+                    )
+            );
+
+        } catch (RuntimeException ex) {
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(
+                            ex.getMessage()
+                    );
+        }
     }
+
+
+    // =========================================================
+    // CHANGE PASSWORD
+    // =========================================================
 
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(
@@ -95,9 +206,16 @@ public class AuthController {
 
             return ResponseEntity
                     .badRequest()
-                    .body(ex.getMessage());
+                    .body(
+                            ex.getMessage()
+                    );
         }
     }
+
+
+    // =========================================================
+    // VERIFY EMAIL
+    // =========================================================
 
     @GetMapping("/verify-email")
     public ResponseEntity<?> verifyEmail(
@@ -114,17 +232,36 @@ public class AuthController {
 
             return ResponseEntity
                     .badRequest()
-                    .body(ex.getMessage());
+                    .body(
+                            ex.getMessage()
+                    );
         }
     }
 
+
+    // =========================================================
+    // RESEND VERIFICATION EMAIL
+    // =========================================================
+
     @PostMapping("/resend-verification")
-    public ResponseEntity<String> resendVerificationEmail(
+    public ResponseEntity<?> resendVerificationEmail(
             @RequestParam String email
     ) {
 
-        return ResponseEntity.ok(
-                authService.resendVerificationEmail(email)
-        );
+        try {
+
+            return ResponseEntity.ok(
+                    authService
+                            .resendVerificationEmail(email)
+            );
+
+        } catch (RuntimeException ex) {
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(
+                            ex.getMessage()
+                    );
+        }
     }
 }

@@ -3,10 +3,7 @@ package com.artgallery.service.impl;
 import com.artgallery.dto.AuthResponse;
 import com.artgallery.dto.LoginRequest;
 import com.artgallery.dto.RegisterRequest;
-import com.artgallery.entity.EmailVerificationToken;
-import com.artgallery.entity.PasswordResetOtp;
-import com.artgallery.entity.Role;
-import com.artgallery.entity.User;
+import com.artgallery.entity.*;
 import com.artgallery.enums.RoleName;
 import com.artgallery.repository.EmailVerificationTokenRepository;
 import com.artgallery.repository.PasswordResetOtpRepository;
@@ -19,8 +16,10 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.artgallery.repository.AccountReactivationOtpRepository;
 
 import java.time.LocalDateTime;
+import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -47,7 +46,9 @@ public class AuthService {
     @Autowired
     private EmailService emailService;
 
-
+    @Autowired
+    private AccountReactivationService
+            accountReactivationService;
     // =========================================================
     // REGISTER
     // =========================================================
@@ -308,8 +309,8 @@ public class AuthService {
 
 
     // =========================================================
-    // LOGIN
-    // =========================================================
+// LOGIN
+// =========================================================
 
     public AuthResponse login(
             LoginRequest request
@@ -325,27 +326,10 @@ public class AuthService {
                 );
 
 
-        // Account suspended
-        if (!user.isEnabled()) {
+        // =====================================================
+        // CHECK PASSWORD
+        // =====================================================
 
-            throw new RuntimeException(
-                    "Your account has been suspended. " +
-                            "Please contact support."
-            );
-        }
-
-
-        // Email not verified
-        if (!user.isEmailVerified()) {
-
-            throw new RuntimeException(
-                    "Please verify your email address " +
-                            "before logging in."
-            );
-        }
-
-
-        // Check password
         if (
                 !passwordEncoder.matches(
                         request.getPassword(),
@@ -359,7 +343,35 @@ public class AuthService {
         }
 
 
-        // Generate JWT
+        // =====================================================
+        // CHECK DEACTIVATED ACCOUNT
+        // =====================================================
+
+        if (!user.isEnabled()) {
+
+            throw new AccountDeactivatedException(
+                    "Your account is deactivated."
+            );
+        }
+
+
+        // =====================================================
+        // CHECK EMAIL VERIFICATION
+        // =====================================================
+
+        if (!user.isEmailVerified()) {
+
+            throw new RuntimeException(
+                    "Please verify your email address " +
+                            "before logging in."
+            );
+        }
+
+
+        // =====================================================
+        // GENERATE JWT
+        // =====================================================
+
         String token =
                 jwtService.generateToken(
                         user.getEmail()
@@ -373,11 +385,9 @@ public class AuthService {
                 user.getName()
         );
     }
-
-
     // =========================================================
-    // FORGOT PASSWORD - SEND OTP
-    // =========================================================
+// FORGOT PASSWORD - SEND OTP
+// =========================================================
 
     @Transactional
     public String sendOtp(
@@ -393,31 +403,35 @@ public class AuthService {
                         );
 
 
-        // Delete previous OTP
-        otpRepo.deleteByEmail(
-                email
-        );
+        // =====================================================
+        // DELETE PREVIOUS OTP
+        // =====================================================
+
+        otpRepo.deleteByEmail(email);
 
 
-        // Generate 6-digit OTP
+        // =====================================================
+        // GENERATE 6-DIGIT OTP
+        // =====================================================
+
         String otp =
                 String.format(
                         "%06d",
-                        new java.util.Random()
+                        new Random()
                                 .nextInt(1_000_000)
                 );
 
 
+        // =====================================================
+        // CREATE OTP
+        // =====================================================
+
         PasswordResetOtp token =
                 new PasswordResetOtp();
 
-        token.setEmail(
-                email
-        );
+        token.setEmail(email);
 
-        token.setOtp(
-                otp
-        );
+        token.setOtp(otp);
 
         token.setExpiryTime(
                 LocalDateTime.now()
@@ -427,12 +441,17 @@ public class AuthService {
         token.setVerified(false);
 
 
-        otpRepo.save(
-                token
-        );
+        // =====================================================
+        // SAVE OTP
+        // =====================================================
+
+        otpRepo.save(token);
 
 
-        // Send password reset email
+        // =====================================================
+        // SEND EMAIL
+        // =====================================================
+
         emailService.sendOtp(
                 email,
                 otp
@@ -442,11 +461,11 @@ public class AuthService {
         return "OTP sent successfully.";
     }
 
-
     // =========================================================
-    // VERIFY PASSWORD RESET OTP
-    // =========================================================
+// VERIFY PASSWORD RESET OTP
+// =========================================================
 
+    @Transactional
     public String verifyOtp(
             String email,
             String otp
@@ -463,7 +482,10 @@ public class AuthService {
                 );
 
 
-        // Check expiry
+        // =====================================================
+        // CHECK EXPIRY
+        // =====================================================
+
         if (
                 token.getExpiryTime()
                         .isBefore(
@@ -471,9 +493,7 @@ public class AuthService {
                         )
         ) {
 
-            otpRepo.delete(
-                    token
-            );
+            otpRepo.delete(token);
 
             throw new RuntimeException(
                     "OTP has expired."
@@ -481,16 +501,17 @@ public class AuthService {
         }
 
 
+        // =====================================================
+        // MARK OTP AS VERIFIED
+        // =====================================================
+
         token.setVerified(true);
 
-        otpRepo.save(
-                token
-        );
+        otpRepo.save(token);
 
 
         return "OTP verified successfully.";
     }
-
 
     // =========================================================
     // RESET PASSWORD

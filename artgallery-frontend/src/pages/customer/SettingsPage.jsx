@@ -7,6 +7,11 @@ import {
     updateNotificationSettings
 } from "../../services/settingsService";
 
+import {
+    deactivateAccount,
+    deleteAccount
+} from "../../services/accountService";
+
 function SettingsPage() {
 
     const navigate = useNavigate();
@@ -21,12 +26,59 @@ function SettingsPage() {
 
     const [saving, setSaving] = useState(false);
 
+    const [confirmAction, setConfirmAction] = useState(null);
+
+    const [accountActionLoading, setAccountActionLoading] =
+        useState(false);
+
 
     useEffect(() => {
 
         loadSettings();
 
     }, []);
+
+    const handleDeactivateAccount = async () => {
+
+        setAccountActionLoading(true);
+
+        try {
+            await deactivateAccount();
+            toast.success("Your account has been deactivated.");
+            localStorage.removeItem("token");
+            localStorage.removeItem("role");
+            setTimeout(() => navigate("/login"), 1000);
+        } catch (error) {
+            console.error("Failed to deactivate account:", error);
+            const responseData = error?.response?.data;
+            const message = typeof responseData === "string" ? responseData : responseData?.message || "Unable to deactivate your account.";
+            toast.error(message);
+        } finally {
+            setAccountActionLoading(false);
+            setConfirmAction(null);
+        }
+    };
+
+    const handleDeleteAccount = async () => {
+
+        setAccountActionLoading(true);
+
+        try {
+            await deleteAccount();
+            toast.success("Your account has been permanently deleted.");
+            localStorage.removeItem("token");
+            localStorage.removeItem("role");
+            setTimeout(() => navigate("/login"), 1000);
+        } catch (error) {
+            console.error("Failed to delete account:", error);
+            const responseData = error?.response?.data;
+            const message = typeof responseData === "string" ? responseData : responseData?.message || "Unable to delete your account.";
+            toast.error(message);
+        } finally {
+            setAccountActionLoading(false);
+            setConfirmAction(null);
+        }
+    };
 
 
     const loadSettings = async () => {
@@ -105,7 +157,7 @@ function SettingsPage() {
                 typeof responseData === "string"
                     ? responseData
                     : responseData?.message ||
-                      "Unable to update settings.";
+                    "Unable to update settings.";
 
             toast.error(message);
 
@@ -444,6 +496,10 @@ function SettingsPage() {
                     </div>
 
 
+                    {/* =========================================
+        DEACTIVATE ACCOUNT
+       ========================================= */}
+
                     <div className="settings-item">
 
                         <div>
@@ -453,26 +509,64 @@ function SettingsPage() {
                             </h3>
 
                             <p>
-                                Temporarily disable your account.
+                                Temporarily disable your account
+                                and log out.
                             </p>
 
                         </div>
 
                         <button
                             className="settings-danger-btn"
-                            onClick={() =>
-                                toast.info(
-                                    "Account deactivation will be available soon."
-                                )
-                            }
+                            onClick={() => setConfirmAction("deactivate")}
+                            disabled={accountActionLoading}
                         >
-                            Deactivate
+
+                            {accountActionLoading
+                                ? "Processing..."
+                                : "Deactivate"
+                            }
+
+                        </button>
+
+                    </div>
+
+
+                    {/* =========================================
+        DELETE ACCOUNT
+       ========================================= */}
+
+                    <div className="settings-item">
+
+                        <div>
+
+                            <h3>
+                                Delete Account
+                            </h3>
+
+                            <p>
+                                Permanently delete your Aurelian
+                                Gallery account. This action cannot
+                                be undone.
+                            </p>
+
+                        </div>
+
+                        <button
+                            className="settings-danger-btn"
+                            onClick={() => setConfirmAction("delete")}
+                            disabled={accountActionLoading}
+                        >
+
+                            {accountActionLoading
+                                ? "Processing..."
+                                : "Delete Account"
+                            }
+
                         </button>
 
                     </div>
 
                 </section>
-
 
                 <div className="settings-footer">
 
@@ -488,6 +582,67 @@ function SettingsPage() {
                 </div>
 
             </div>
+            {confirmAction && (
+
+    <div className="confirm-overlay">
+
+        <div className="confirm-modal">
+
+            <div className={`confirm-icon confirm-icon--${confirmAction === "delete" ? "danger" : "warning"}`}>
+                {confirmAction === "delete" ? "🗑" : "⏸"}
+            </div>
+
+            <h2 className="confirm-title">
+                {confirmAction === "delete" ? "Delete Account" : "Deactivate Account"}
+            </h2>
+
+            {confirmAction === "delete" ? (
+                <>
+                    <p className="confirm-message confirm-message--strong">
+                        This action is permanent.
+                    </p>
+                    <p className="confirm-message">
+                        Your Aurelian Gallery account will be permanently deleted. This cannot be undone.
+                    </p>
+                </>
+            ) : (
+                <p className="confirm-message">
+                    Your account will be disabled and you'll be logged out. You can contact the gallery administrator to reactivate it.
+                </p>
+            )}
+
+            <div className="confirm-divider" />
+
+            <div className="confirm-actions">
+
+                <button
+                    className={confirmAction === "delete" ? "confirm-btn-danger" : "confirm-btn-warning"}
+                    onClick={confirmAction === "delete" ? handleDeleteAccount : handleDeactivateAccount}
+                    disabled={accountActionLoading}
+                >
+                    {accountActionLoading ? (
+                        <span className="btn-spinner-wrap">
+                            <span className="btn-spinner" /> Processing...
+                        </span>
+                    ) : (
+                        confirmAction === "delete" ? "Yes, Delete Permanently" : "Yes, Deactivate"
+                    )}
+                </button>
+
+                <button
+                    className="confirm-btn-cancel"
+                    onClick={() => setConfirmAction(null)}
+                    disabled={accountActionLoading}
+                >
+                    Cancel
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+)}
 
         </div>
     );

@@ -42,7 +42,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 request.getServletPath();
 
         return path.startsWith("/oauth2/")
-                || path.startsWith("/login/oauth2/");
+                || path.startsWith("/login/oauth2/")
+                || path.startsWith("/api/auth/");
     }
 
 
