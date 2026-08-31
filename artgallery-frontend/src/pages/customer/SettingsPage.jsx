@@ -607,7 +607,7 @@ function SettingsPage() {
                 </>
             ) : (
                 <p className="confirm-message">
-                    Your account will be disabled and you'll be logged out. You can contact the gallery administrator to reactivate it.
+                    Your account will be disabled and you'll be logged out. Login back to reactivate your account.
                 </p>
             )}
 

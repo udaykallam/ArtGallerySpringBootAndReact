@@ -12,4 +12,6 @@ public interface UserSettingsRepository
     Optional<UserSettings> findByUser(User user);
 
     Optional<UserSettings> findByUserId(Long userId);
+
+    void deleteByUser(User user);
 }

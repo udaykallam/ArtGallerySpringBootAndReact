@@ -63,4 +63,6 @@ WHERE r.artwork.id = :artworkId
             Long artworkId
     );
 
+    void deleteByUser(User user);
+
 }

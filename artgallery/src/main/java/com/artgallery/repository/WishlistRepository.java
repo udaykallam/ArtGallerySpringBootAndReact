@@ -17,4 +17,6 @@ public interface WishlistRepository extends JpaRepository<Wishlist, Long> {
     @Transactional
     @Modifying
     void deleteByUserIdAndArtworkId(Long userId, Long artworkId);
+
+    void deleteByUser(User user);
 }
