@@ -113,6 +113,11 @@ function LoginPage() {
         );
 
         localStorage.setItem(
+            "email",
+            email
+        )
+
+        localStorage.setItem(
             "userName",
             data.name
         );

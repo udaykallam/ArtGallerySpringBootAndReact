@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+
 import axiosClient from "../../api/axiosClient";
+
 import {
     addToWishlist,
     addToCart
 } from "../../services/commerceService";
-import { toast } from "sonner";
 
 import {
     getReviews,
@@ -14,6 +15,8 @@ import {
     deleteReview,
     updateReview
 } from "../../services/reviewService";
+
+import { toast } from "sonner";
 
 
 function ArtworkDetailsPage() {
@@ -45,9 +48,31 @@ function ArtworkDetailsPage() {
     const [editingReviewId, setEditingReviewId] =
         useState(null);
 
+    const [myReview, setMyReview] =
+        useState(null);
+
+    const [reviewLoading, setReviewLoading] =
+        useState(false);
+
+    const [reviewToDelete, setReviewToDelete] = useState(null); // holds reviewId or null
+    const [deletingReview, setDeletingReview] = useState(false);
+
+
+    // =====================================================
+    // CURRENT USER
+    // =====================================================
 
     const role =
         localStorage.getItem("role");
+
+    const currentUserEmail =
+        localStorage
+            .getItem("email")
+            ?.trim()
+            .toLowerCase() || null;
+
+    const currentUserId =
+        localStorage.getItem("userId");
 
 
     // =====================================================
@@ -57,10 +82,13 @@ function ArtworkDetailsPage() {
     useEffect(() => {
 
         loadArtwork();
+
         loadReviews();
+
         loadSummary();
 
     }, [id]);
+
 
 
     // =====================================================
@@ -94,6 +122,106 @@ function ArtworkDetailsPage() {
 
 
     // =====================================================
+    // FIND CURRENT USER'S REVIEW
+    // =====================================================
+
+    const findMyReview = (reviewList) => {
+
+        if (!reviewList || reviewList.length === 0) {
+
+            return null;
+        }
+
+
+        // -------------------------------------------------
+        // CURRENT USER EMAIL
+        // -------------------------------------------------
+
+        const storedEmail =
+            localStorage
+                .getItem("email")
+                ?.trim()
+                .toLowerCase() || null;
+
+
+        // -------------------------------------------------
+        // CURRENT USER ID
+        // -------------------------------------------------
+
+        const storedUserId =
+            localStorage.getItem("userId");
+
+
+        // -------------------------------------------------
+        // FIND REVIEW
+        // -------------------------------------------------
+
+        const foundReview =
+            reviewList.find(review => {
+
+                // -----------------------------------------
+                // REVIEW EMAIL
+                // -----------------------------------------
+
+                const reviewEmail =
+                    review.customerEmail
+                        ?.trim()
+                        .toLowerCase() || null;
+
+
+                // -----------------------------------------
+                // REVIEW USER ID
+                //
+                // Support different possible backend names.
+                // -----------------------------------------
+
+                const reviewUserId =
+                    review.customerId ??
+                    review.userId ??
+                    review.customer?.id ??
+                    review.user?.id ??
+                    null;
+
+
+                // -----------------------------------------
+                // MATCH BY USER ID
+                // -----------------------------------------
+
+                if (
+                    storedUserId &&
+                    reviewUserId &&
+                    String(storedUserId) ===
+                    String(reviewUserId)
+                ) {
+
+                    return true;
+                }
+
+
+                // -----------------------------------------
+                // MATCH BY EMAIL
+                // -----------------------------------------
+
+                if (
+                    storedEmail &&
+                    reviewEmail &&
+                    storedEmail === reviewEmail
+                ) {
+
+                    return true;
+                }
+
+
+                return false;
+
+            }) || null;
+
+
+        return foundReview;
+    };
+
+
+    // =====================================================
     // LOAD REVIEWS
     // =====================================================
 
@@ -104,7 +232,31 @@ function ArtworkDetailsPage() {
             const data =
                 await getReviews(id);
 
-            setReviews(data || []);
+            const reviewList =
+                Array.isArray(data)
+                    ? data
+                    : [];
+
+
+            setReviews(
+                reviewList
+            );
+
+
+            // -------------------------------------------------
+            // FIND CURRENT USER'S REVIEW
+            // -------------------------------------------------
+
+            const currentReview =
+                findMyReview(
+                    reviewList
+                );
+
+
+            setMyReview(
+                currentReview
+            );
+
 
         } catch (error) {
 
@@ -112,6 +264,7 @@ function ArtworkDetailsPage() {
                 "Failed to load reviews:",
                 error
             );
+
         }
     };
 
@@ -145,6 +298,10 @@ function ArtworkDetailsPage() {
 
     const submitReview = async () => {
 
+        // -------------------------------------------------
+        // CHECK RATING
+        // -------------------------------------------------
+
         if (rating === 0) {
 
             toast.error(
@@ -155,11 +312,47 @@ function ArtworkDetailsPage() {
         }
 
 
+        // -------------------------------------------------
+        // CHECK ONE REVIEW RULE
+        // -------------------------------------------------
+
+        if (
+            !editingReviewId &&
+            myReview
+        ) {
+
+            toast.error(
+                "You have already reviewed this artwork."
+            );
+
+            return;
+        }
+
+
+        // -------------------------------------------------
+        // CHECK COMMENT
+        // -------------------------------------------------
+
+        if (
+            !comment.trim()
+        ) {
+
+            toast.error(
+                "Please write a comment."
+            );
+
+            return;
+        }
+
+
+        setReviewLoading(true);
+
+
         try {
 
-            // -------------------------------------------------
+            // =================================================
             // UPDATE EXISTING REVIEW
-            // -------------------------------------------------
+            // =================================================
 
             if (editingReviewId) {
 
@@ -167,19 +360,21 @@ function ArtworkDetailsPage() {
                     editingReviewId,
                     {
                         rating,
-                        comment
+                        comment: comment.trim()
                     }
                 );
 
+
                 toast.success(
-                    "Review updated."
+                    "Review updated successfully."
                 );
 
             }
 
-            // -------------------------------------------------
+
+            // =================================================
             // CREATE NEW REVIEW
-            // -------------------------------------------------
+            // =================================================
 
             else {
 
@@ -187,19 +382,20 @@ function ArtworkDetailsPage() {
                     id,
                     {
                         rating,
-                        comment
+                        comment: comment.trim()
                     }
                 );
 
+
                 toast.success(
-                    "Review submitted."
+                    "Review submitted successfully."
                 );
             }
 
 
-            // -------------------------------------------------
+            // =================================================
             // RESET FORM
-            // -------------------------------------------------
+            // =================================================
 
             setRating(0);
 
@@ -208,9 +404,9 @@ function ArtworkDetailsPage() {
             setEditingReviewId(null);
 
 
-            // -------------------------------------------------
+            // =================================================
             // REFRESH REVIEWS
-            // -------------------------------------------------
+            // =================================================
 
             await loadReviews();
 
@@ -224,11 +420,24 @@ function ArtworkDetailsPage() {
                 error
             );
 
-            toast.error(
-                error.response?.data ||
+
+            const message =
                 error.response?.data?.message ||
-                "Unable to submit review."
+                error.response?.data ||
+                "Unable to submit review.";
+
+
+            toast.error(
+                typeof message === "string"
+                    ? message
+                    : "Unable to submit review."
             );
+
+
+        } finally {
+
+            setReviewLoading(false);
+
         }
     };
 
@@ -239,31 +448,41 @@ function ArtworkDetailsPage() {
 
     const removeReview = async (reviewId) => {
 
+        if (!reviewId) {
+            toast.error("Invalid review.");
+            return;
+        }
+
+        setDeletingReview(true);
+
         try {
 
-            await deleteReview(
-                reviewId
-            );
+            await deleteReview(reviewId);
 
-            toast.success(
-                "Review deleted."
-            );
+            toast.success("Review deleted successfully.");
+
+            setMyReview(null);
+            setEditingReviewId(null);
+            setRating(0);
+            setComment("");
 
             await loadReviews();
-
             await loadSummary();
 
         } catch (error) {
 
-            console.error(
-                "Delete review error:",
-                error
-            );
+            console.error("Delete review error:", error);
 
-            toast.error(
+            const message =
+                error.response?.data?.message ||
                 error.response?.data ||
-                "Unable to delete review."
-            );
+                "Unable to delete review.";
+
+            toast.error(typeof message === "string" ? message : "Unable to delete review.");
+
+        } finally {
+            setDeletingReview(false);
+            setReviewToDelete(null);
         }
     };
 
@@ -274,20 +493,30 @@ function ArtworkDetailsPage() {
 
     const editReview = (review) => {
 
+        if (!review) {
+
+            return;
+        }
+
+
         setEditingReviewId(
             review.reviewId
         );
 
+
         setRating(
-            review.rating
+            Number(review.rating)
         );
+
 
         setComment(
             review.comment || ""
         );
 
 
-        // Scroll to review form
+        // -------------------------------------------------
+        // Scroll to form
+        // -------------------------------------------------
 
         setTimeout(() => {
 
@@ -324,7 +553,9 @@ function ArtworkDetailsPage() {
 
     const handleWishlist = async () => {
 
-        if (!localStorage.getItem("token")) {
+        if (
+            !localStorage.getItem("token")
+        ) {
 
             navigate("/login");
 
@@ -338,6 +569,7 @@ function ArtworkDetailsPage() {
                 Number(id)
             );
 
+
             toast.success(
                 "Added to Wishlist."
             );
@@ -348,6 +580,7 @@ function ArtworkDetailsPage() {
                 "Wishlist error:",
                 error
             );
+
 
             toast.error(
                 error.response?.data?.message ||
@@ -363,7 +596,9 @@ function ArtworkDetailsPage() {
 
     const handleCart = async () => {
 
-        if (!localStorage.getItem("token")) {
+        if (
+            !localStorage.getItem("token")
+        ) {
 
             navigate("/login");
 
@@ -371,7 +606,9 @@ function ArtworkDetailsPage() {
         }
 
 
-        if (Number(artwork.stock) <= 0) {
+        if (
+            Number(artwork.stock) <= 0
+        ) {
 
             toast.error(
                 "This artwork is currently out of stock."
@@ -388,6 +625,7 @@ function ArtworkDetailsPage() {
                 1
             );
 
+
             toast.success(
                 "Added to Cart."
             );
@@ -398,6 +636,7 @@ function ArtworkDetailsPage() {
                 "Cart error:",
                 error
             );
+
 
             toast.error(
                 error.response?.data?.message ||
@@ -435,7 +674,10 @@ function ArtworkDetailsPage() {
     // =====================================================
 
     const originalPrice =
-        Number(artwork.price || 0);
+        Number(
+            artwork.price || 0
+        );
+
 
     const discountedPrice =
         Number(
@@ -502,14 +744,13 @@ function ArtworkDetailsPage() {
 
                 {/* =================================================
                     MAIN ARTWORK SECTION
-                    IMAGE + DETAILS ONLY
                 ================================================= */}
 
                 <div className="details-card">
 
 
                     {/* =================================================
-                        LEFT — ARTWORK IMAGE
+                        LEFT — IMAGE
                     ================================================= */}
 
                     <div className="details-image-wrap">
@@ -532,33 +773,21 @@ function ArtworkDetailsPage() {
 
 
                     {/* =================================================
-                        RIGHT — ARTWORK DETAILS
+                        RIGHT — DETAILS
                     ================================================= */}
 
                     <div className="details-content">
 
-
-                        {/* ---------------------------------------------
-                            EYEBROW
-                        --------------------------------------------- */}
 
                         <div className="detail-eyebrow">
                             Original Artwork
                         </div>
 
 
-                        {/* ---------------------------------------------
-                            TITLE
-                        --------------------------------------------- */}
-
                         <h1>
                             {artwork.title}
                         </h1>
 
-
-                        {/* ---------------------------------------------
-                            ARTIST
-                        --------------------------------------------- */}
 
                         <div className="detail-artist">
 
@@ -570,10 +799,6 @@ function ArtworkDetailsPage() {
                         </div>
 
 
-                        {/* ---------------------------------------------
-                            META
-                        --------------------------------------------- */}
-
                         <div className="detail-meta">
 
 
@@ -584,8 +809,10 @@ function ArtworkDetailsPage() {
                                 </div>
 
                                 <div className="meta-value">
+
                                     {artwork.categoryName ||
                                         "Uncategorized"}
+
                                 </div>
 
                             </div>
@@ -598,11 +825,12 @@ function ArtworkDetailsPage() {
                                 </div>
 
                                 <div
-                                    className={`meta-value ${
-                                        Number(artwork.stock) > 0
+                                    className={
+                                        `meta-value ${Number(artwork.stock) > 0
                                             ? "availability-available"
                                             : "availability-unavailable"
-                                    }`}
+                                        }`
+                                    }
                                 >
 
                                     {Number(artwork.stock) > 0
@@ -616,10 +844,6 @@ function ArtworkDetailsPage() {
                         </div>
 
 
-                        {/* ---------------------------------------------
-                            DESCRIPTION
-                        --------------------------------------------- */}
-
                         <p className="details-description">
 
                             {artwork.description ||
@@ -627,10 +851,6 @@ function ArtworkDetailsPage() {
 
                         </p>
 
-
-                        {/* ---------------------------------------------
-                            PRICE
-                        --------------------------------------------- */}
 
                         <div className="details-price-row">
 
@@ -687,10 +907,6 @@ function ArtworkDetailsPage() {
                         </div>
 
 
-                        {/* ---------------------------------------------
-                            ACTIONS
-                        --------------------------------------------- */}
-
                         <div className="details-actions">
 
 
@@ -731,11 +947,7 @@ function ArtworkDetailsPage() {
 
 
                 {/* =================================================
-                    REVIEWS SECTION
-
-                    IMPORTANT:
-                    This is OUTSIDE details-card.
-                    Therefore it occupies the complete page width.
+                    REVIEWS
                 ================================================= */}
 
                 <section className="review-summary">
@@ -769,9 +981,7 @@ function ArtworkDetailsPage() {
                     <div className="review-overview">
 
 
-                        {/* ---------------------------------------------
-                            SCORE
-                        --------------------------------------------- */}
+                        {/* SCORE */}
 
                         <div className="review-score-box">
 
@@ -824,55 +1034,44 @@ function ArtworkDetailsPage() {
                         </div>
 
 
-                        {/* ---------------------------------------------
+                        {/* =================================================
                             RATING DISTRIBUTION
-                        --------------------------------------------- */}
+                        ================================================= */}
 
                         <div className="rating-distribution">
 
-
                             {[5, 4, 3, 2, 1].map(
-                                star => {
+                                star => (
 
-                                    /*
-                                     * If the backend doesn't currently
-                                     * return rating distribution,
-                                     * keep the bars empty.
-                                     *
-                                     * This avoids inventing data.
-                                     */
+                                    <div
+                                        className="rating-row"
+                                        key={star}
+                                    >
 
-                                    return (
-
-                                        <div
-                                            className="rating-row"
-                                            key={star}
-                                        >
-
-                                            <span className="rating-label">
-                                                {star} ★
-                                            </span>
+                                        <span className="rating-label">
+                                            {star} ★
+                                        </span>
 
 
-                                            <div className="rating-bar">
+                                        <div className="rating-bar">
 
-                                                <div
-                                                    className="rating-bar-fill"
-                                                    style={{
-                                                        width: "0%"
-                                                    }}
-                                                />
-
-                                            </div>
-
-
-                                            <span className="rating-count">
-                                                0
-                                            </span>
+                                            <div
+                                                className="rating-bar-fill"
+                                                style={{
+                                                    width: "0%"
+                                                }}
+                                            />
 
                                         </div>
-                                    );
-                                }
+
+
+                                        <span className="rating-count">
+                                            0
+                                        </span>
+
+                                    </div>
+
+                                )
                             )}
 
                         </div>
@@ -884,134 +1083,186 @@ function ArtworkDetailsPage() {
                         WRITE / EDIT REVIEW
                     ================================================= */}
 
-                    {role === "ROLE_CUSTOMER" && (
+                    {role === "ROLE_CUSTOMER" &&
+                        (
+                            !myReview ||
+                            editingReviewId
+                        ) && (
 
-                        <div
-                            className="review-form"
-                            id="review-form"
-                        >
+                            <div
+                                className="review-form"
+                                id="review-form"
+                            >
 
 
-                            <div className="review-form-header">
+                                <div className="review-form-header">
+
+                                    <div>
+
+                                        <div className="review-form-eyebrow">
+
+                                            {editingReviewId
+                                                ? "Edit Your Review"
+                                                : "Customer Review"}
+
+                                        </div>
+
+
+                                        <h3>
+
+                                            {editingReviewId
+                                                ? "Update your experience"
+                                                : "Share your experience"}
+
+                                        </h3>
+
+
+                                        <p className="review-subtitle">
+
+                                            How would you rate this artwork?
+
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+
+                                {/* =================================================
+                                    STAR PICKER
+                                ================================================= */}
+
+                                <div className="star-picker">
+
+                                    {[1, 2, 3, 4, 5].map(
+                                        star => (
+
+                                            <button
+                                                type="button"
+                                                key={star}
+                                                className={
+                                                    star <= rating
+                                                        ? "review-star selected"
+                                                        : "review-star"
+                                                }
+                                                onClick={() =>
+                                                    setRating(
+                                                        star
+                                                    )
+                                                }
+                                                aria-label={
+                                                    `${star} star`
+                                                }
+                                            >
+                                                ★
+                                            </button>
+
+                                        )
+                                    )}
+
+                                </div>
+
+
+                                {/* =================================================
+                                    COMMENT
+                                ================================================= */}
+
+                                <textarea
+                                    value={comment}
+                                    onChange={(e) =>
+                                        setComment(
+                                            e.target.value
+                                        )
+                                    }
+                                    placeholder="Share your thoughts about this artwork..."
+                                    rows={5}
+                                    disabled={
+                                        reviewLoading
+                                    }
+                                />
+
+
+                                {/* =================================================
+                                    ACTIONS
+                                ================================================= */}
+
+                                <div className="review-form-actions">
+
+
+                                    <button
+                                        type="button"
+                                        className="btn-primary"
+                                        onClick={
+                                            submitReview
+                                        }
+                                        disabled={
+                                            reviewLoading
+                                        }
+                                    >
+
+                                        {reviewLoading
+                                            ? "Saving..."
+                                            : editingReviewId
+                                                ? "Update Review"
+                                                : "Submit Review"}
+
+                                    </button>
+
+
+                                    {editingReviewId && (
+
+                                        <button
+                                            type="button"
+                                            className="btn-secondary"
+                                            onClick={
+                                                cancelEdit
+                                            }
+                                            disabled={
+                                                reviewLoading
+                                            }
+                                        >
+                                            Cancel
+                                        </button>
+
+                                    )}
+
+                                </div>
+
+
+                            </div>
+
+                        )}
+
+
+                    {/* =================================================
+                        ALREADY REVIEWED MESSAGE
+                    ================================================= */}
+
+                    {role === "ROLE_CUSTOMER" &&
+                        myReview &&
+                        !editingReviewId && (
+
+                            <div className="review-already-submitted">
+
+                                <div className="review-already-mark">
+                                    ✓
+                                </div>
 
                                 <div>
 
-                                    <div className="review-form-eyebrow">
-                                        {editingReviewId
-                                            ? "Edit Your Review"
-                                            : "Customer Review"}
-                                    </div>
+                                    <strong>
+                                        You have already reviewed this artwork.
+                                    </strong>
 
-                                    <h3>
-
-                                        {editingReviewId
-                                            ? "Update your experience"
-                                            : "Share your experience"}
-
-                                    </h3>
-
-                                    <p className="review-subtitle">
-
-                                        How would you rate this artwork?
-
+                                    <p>
+                                        You can edit or delete your review below.
                                     </p>
 
                                 </div>
 
                             </div>
 
-
-                            {/* -----------------------------------------
-                                STAR PICKER
-                            ----------------------------------------- */}
-
-                            <div className="star-picker">
-
-                                {[1, 2, 3, 4, 5].map(
-                                    star => (
-
-                                        <button
-                                            type="button"
-                                            key={star}
-                                            className={
-                                                star <= rating
-                                                    ? "review-star selected"
-                                                    : "review-star"
-                                            }
-                                            onClick={() =>
-                                                setRating(star)
-                                            }
-                                            aria-label={
-                                                `${star} star`
-                                            }
-                                        >
-                                            ★
-                                        </button>
-
-                                    )
-                                )}
-
-                            </div>
-
-
-                            {/* -----------------------------------------
-                                COMMENT
-                            ----------------------------------------- */}
-
-                            <textarea
-                                value={comment}
-                                onChange={(e) =>
-                                    setComment(
-                                        e.target.value
-                                    )
-                                }
-                                placeholder="Share your thoughts about this artwork..."
-                                rows={5}
-                            />
-
-
-                            {/* -----------------------------------------
-                                ACTIONS
-                            ----------------------------------------- */}
-
-                            <div className="review-form-actions">
-
-
-                                <button
-                                    type="button"
-                                    className="btn-primary"
-                                    onClick={
-                                        submitReview
-                                    }
-                                >
-
-                                    {editingReviewId
-                                        ? "Update Review"
-                                        : "Submit Review"}
-
-                                </button>
-
-
-                                {editingReviewId && (
-
-                                    <button
-                                        type="button"
-                                        className="btn-secondary"
-                                        onClick={
-                                            cancelEdit
-                                        }
-                                    >
-                                        Cancel
-                                    </button>
-
-                                )}
-
-                            </div>
-
-
-                        </div>
-
-                    )}
+                        )}
 
 
                     {/* =================================================
@@ -1029,9 +1280,11 @@ function ArtworkDetailsPage() {
                                     ✦
                                 </div>
 
+
                                 <h3>
                                     No reviews yet
                                 </h3>
+
 
                                 <p>
                                     Be the first to share
@@ -1044,126 +1297,141 @@ function ArtworkDetailsPage() {
                         ) : (
 
                             reviews.map(
-                                review => (
+                                review => {
 
-                                    <div
-                                        key={
-                                            review.reviewId
-                                        }
-                                        className="review-card"
-                                    >
+                                    const isMyReview =
+                                        myReview?.reviewId ===
+                                        review.reviewId;
 
 
-                                        {/* ---------------------------------
-                                            REVIEW HEADER
-                                        --------------------------------- */}
+                                    return (
 
-                                        <div className="review-header">
-
-
-                                            <div className="review-user">
-
-
-                                                <div className="review-avatar">
-
-                                                    {(
-                                                        review.customerName ||
-                                                        "U"
-                                                    )
-                                                        .charAt(0)
-                                                        .toUpperCase()}
-
-                                                </div>
+                                        <div
+                                            key={
+                                                review.reviewId
+                                            }
+                                            className={
+                                                isMyReview
+                                                    ? "review-card review-card-own"
+                                                    : "review-card"
+                                            }
+                                        >
 
 
-                                                <div>
+                                            {/* =================================================
+                                                REVIEW HEADER
+                                            ================================================= */}
 
-                                                    <div className="review-name">
+                                            <div className="review-header">
 
-                                                        {review.customerName ||
-                                                            "Customer"}
+
+                                                <div className="review-user">
+
+
+                                                    <div className="review-avatar">
+
+                                                        {(
+                                                            review.customerName ||
+                                                            "U"
+                                                        )
+                                                            .charAt(0)
+                                                            .toUpperCase()}
+
+                                                    </div>
+
+
+                                                    <div>
+
+                                                        <div className="review-name">
+
+                                                            {review.customerName ||
+                                                                "Customer"}
+
+                                                            {isMyReview && (
+
+                                                                <span className="your-review-label">
+                                                                    Your Review
+                                                                </span>
+
+                                                            )}
+
+                                                        </div>
+
+
+                                                        <div className="review-date">
+
+                                                            {review.createdAt
+                                                                ? new Date(
+                                                                    review.createdAt
+                                                                ).toLocaleDateString(
+                                                                    "en-IN",
+                                                                    {
+                                                                        day:
+                                                                            "numeric",
+                                                                        month:
+                                                                            "long",
+                                                                        year:
+                                                                            "numeric"
+                                                                    }
+                                                                )
+                                                                : ""}
+
+                                                        </div>
 
                                                     </div>
 
 
-                                                    <div className="review-date">
-
-                                                        {review.createdAt
-                                                            ? new Date(
-                                                                review.createdAt
-                                                            ).toLocaleDateString(
-                                                                "en-IN",
-                                                                {
-                                                                    day:
-                                                                        "numeric",
-                                                                    month:
-                                                                        "long",
-                                                                    year:
-                                                                        "numeric"
-                                                                }
-                                                            )
-                                                            : ""}
-
-                                                    </div>
-
                                                 </div>
 
 
-                                            </div>
+                                                {/* =================================================
+                                                    REVIEW STARS
+                                                ================================================= */}
 
-
-                                            {/* ---------------------------------
-                                                REVIEW STARS
-                                            --------------------------------- */}
-
-                                            <div className="review-card-stars">
-
-                                                {"★".repeat(
-                                                    Number(
-                                                        review.rating
-                                                    )
-                                                )}
-
-                                                <span>
+                                                <div className="review-card-stars">
 
                                                     {"★".repeat(
-                                                        Math.max(
-                                                            0,
-                                                            5 -
-                                                            Number(
-                                                                review.rating
-                                                            )
+                                                        Number(
+                                                            review.rating
                                                         )
                                                     )}
 
-                                                </span>
+                                                    <span>
+
+                                                        {"★".repeat(
+                                                            Math.max(
+                                                                0,
+                                                                5 -
+                                                                Number(
+                                                                    review.rating
+                                                                )
+                                                            )
+                                                        )}
+
+                                                    </span>
+
+                                                </div>
+
 
                                             </div>
 
 
-                                        </div>
+                                            {/* =================================================
+                                                COMMENT
+                                            ================================================= */}
+
+                                            <p className="review-card-comment">
+
+                                                {review.comment}
+
+                                            </p>
 
 
-                                        {/* ---------------------------------
-                                            COMMENT
-                                        --------------------------------- */}
+                                            {/* =================================================
+                                                EDIT / DELETE
+                                            ================================================= */}
 
-                                        <p className="review-card-comment">
-
-                                            {review.comment}
-
-                                        </p>
-
-
-                                        {/* ---------------------------------
-                                            ACTIONS
-                                        --------------------------------- */}
-
-                                        {review.customerEmail &&
-                                            localStorage.getItem(
-                                                "email"
-                                            ) ===
-                                                review.customerEmail && (
+                                            {isMyReview && (
 
                                                 <div className="review-card-actions">
 
@@ -1174,17 +1442,16 @@ function ArtworkDetailsPage() {
                                                                 review
                                                             )
                                                         }
+                                                        disabled={reviewLoading || deletingReview}
                                                     >
                                                         Edit
                                                     </button>
 
+
                                                     <button
                                                         type="button"
-                                                        onClick={() =>
-                                                            removeReview(
-                                                                review.reviewId
-                                                            )
-                                                        }
+                                                        onClick={() => setReviewToDelete(review.reviewId)}
+                                                        disabled={reviewLoading}
                                                     >
                                                         Delete
                                                     </button>
@@ -1193,9 +1460,13 @@ function ArtworkDetailsPage() {
 
                                             )}
 
-                                    </div>
 
-                                )
+                                        </div>
+
+                                    );
+
+                                }
+
                             )
 
                         )}
@@ -1204,9 +1475,59 @@ function ArtworkDetailsPage() {
 
 
                 </section>
+                {reviewToDelete && (
 
+                <div className="confirm-overlay">
+
+                    <div className="confirm-modal">
+
+                        <div className="confirm-icon confirm-icon--danger">
+                            🗑
+                        </div>
+
+                        <h2 className="confirm-title">
+                            Delete Review
+                        </h2>
+
+                        <p className="confirm-message">
+                            Are you sure you want to delete your review? This action cannot be undone.
+                        </p>
+
+                        <div className="confirm-divider" />
+
+                        <div className="confirm-actions">
+
+                            <button
+                                className="confirm-btn-danger"
+                                onClick={() => removeReview(reviewToDelete)}
+                                disabled={deletingReview}
+                            >
+                                {deletingReview ? (
+                                    <span className="btn-spinner-wrap">
+                                        <span className="btn-spinner" /> Deleting...
+                                    </span>
+                                ) : (
+                                    "Yes, Delete Review"
+                                )}
+                            </button>
+
+                            <button
+                                className="confirm-btn-cancel"
+                                onClick={() => setReviewToDelete(null)}
+                                disabled={deletingReview}
+                            >
+                                Cancel
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            )}
 
             </div>
+            
 
         </div>
     );
