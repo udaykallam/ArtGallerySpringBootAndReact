@@ -30,6 +30,8 @@ import ChangePasswordPage from "./pages/auth/ChangePasswordPage";
 import SettingsPage from "./pages/customer/SettingsPage";
 import VerifyEmailPage from "./pages/auth/VerifyEmailPage";
 import AdminAnnouncementsPage from "./pages/admin/AdminAnnouncementsPage";
+import ContactPage from "./pages/support/ContactPage";
+import SupportTicketPage from "./pages/support/SupportTicketPage";
 
 
 function App() {
@@ -44,6 +46,16 @@ function App() {
                 <Route
                     path="/"
                     element={<HomePage />}
+                />
+
+                <Route
+                    path="/contact"
+                    element={<ContactPage />}
+                />
+
+                <Route
+                    path="/contact/tickets/:ticketId"
+                    element={<SupportTicketPage />}
                 />
 
                 <Route
@@ -194,7 +206,7 @@ function App() {
                     }
                 />
 
-                  <Route
+                <Route
                     path="/artist/orders"
                     element={
                         <ProtectedRoute

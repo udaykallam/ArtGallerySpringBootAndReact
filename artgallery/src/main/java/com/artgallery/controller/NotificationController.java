@@ -27,13 +27,6 @@ public class NotificationController {
     public ResponseEntity<List<NotificationResponse>> getNotifications(
             Principal principal
     ) {
-        System.out.println(
-                "NOTIFICATION PRINCIPAL = "
-                        + (principal == null
-                        ? "NULL"
-                        : principal.getName())
-        );
-
         return ResponseEntity.ok(
                 notificationService.getNotifications(
                         principal.getName()
@@ -67,13 +60,6 @@ public class NotificationController {
     public ResponseEntity<Long> getUnreadCount(
             Principal principal
     ) {
-        System.out.println(
-                "UNREAD COUNT PRINCIPAL = "
-                        + (principal == null
-                        ? "NULL"
-                        : principal.getName())
-        );
-
         return ResponseEntity.ok(
                 notificationService.getUnreadCount(
                         principal.getName()

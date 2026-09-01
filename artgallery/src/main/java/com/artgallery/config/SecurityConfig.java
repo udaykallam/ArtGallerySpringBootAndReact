@@ -77,6 +77,10 @@ public class SecurityConfig {
                                 "/api/auth/change-password"
                         ).authenticated()
 
+                        .requestMatchers(
+                                "/api/support/**"
+                        ).authenticated()
+
                         // Everything else
                         .anyRequest().authenticated()
                 )
