@@ -8,28 +8,36 @@ import WishlistPage from "./pages/customer/WishlistPage";
 import CartPage from "./pages/customer/CartPage";
 import Navbar from "./components/common/Navbar";
 import OrdersPage from "./pages/customer/OrdersPage";
+
 import ProtectedRoute from "./routes/ProtectedRoute";
+
 import ArtistDashboard from "./pages/artist/ArtistDashboard";
 import MyArtworks from "./pages/artist/MyArtworks";
 import UploadArtwork from "./pages/artist/UploadArtwork";
 import EditArtwork from "./pages/artist/EditArtwork";
 import ArtistOrders from "./pages/artist/ArtistOrders";
+
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import CategoriesPage from "./pages/admin/CategoriesPage";
 import UsersPage from "./pages/admin/UsersPage";
 import ArtworksPage from "./pages/admin/ArtworksPage";
 import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
+import AdminAnnouncementsPage from "./pages/admin/AdminAnnouncementsPage";
+import AdminSupportPage from "./pages/admin/AdminSupportPage";
+
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 import VerifyOtpPage from "./pages/auth/VerifyOtpPage";
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage";
 import OAuthSuccessPage from "./pages/auth/OAuthSuccessPage";
+import ChangePasswordPage from "./pages/auth/ChangePasswordPage";
+import VerifyEmailPage from "./pages/auth/VerifyEmailPage";
+
 import NotFoundPage from "./pages/errors/NotFoundPage";
 import ServerUnavailablePage from "./pages/errors/ServerUnavailablePage";
+
 import ProfilePage from "./pages/profile/ProfilePage";
-import ChangePasswordPage from "./pages/auth/ChangePasswordPage";
 import SettingsPage from "./pages/customer/SettingsPage";
-import VerifyEmailPage from "./pages/auth/VerifyEmailPage";
-import AdminAnnouncementsPage from "./pages/admin/AdminAnnouncementsPage";
+
 import ContactPage from "./pages/support/ContactPage";
 import SupportTicketPage from "./pages/support/SupportTicketPage";
 
@@ -39,9 +47,14 @@ function App() {
     return (
 
         <BrowserRouter>
+
             <Navbar />
 
             <Routes>
+
+                {/* =====================================================
+                    PUBLIC ROUTES
+                ===================================================== */}
 
                 <Route
                     path="/"
@@ -49,33 +62,13 @@ function App() {
                 />
 
                 <Route
-                    path="/contact"
-                    element={<ContactPage />}
-                />
-
-                <Route
-                    path="/contact/tickets/:ticketId"
-                    element={<SupportTicketPage />}
-                />
-
-                <Route
-                    path="*"
-                    element={<NotFoundPage />}
-                />
-
-                <Route
-                    path="/server-unavailable"
-                    element={<ServerUnavailablePage />}
-                />
-
-                <Route
-                    path="/orders"
-                    element={<OrdersPage />}
-                />
-
-                <Route
                     path="/login"
                     element={<LoginPage />}
+                />
+
+                <Route
+                    path="/register"
+                    element={<RegisterPage />}
                 />
 
                 <Route
@@ -94,16 +87,6 @@ function App() {
                 />
 
                 <Route
-                    path="/settings"
-                    element={<SettingsPage />}
-                />
-
-                <Route
-                    path="/change-password"
-                    element={<ChangePasswordPage />}
-                />
-
-                <Route
                     path="/verify-otp"
                     element={<VerifyOtpPage />}
                 />
@@ -114,18 +97,31 @@ function App() {
                 />
 
                 <Route
-                    path="/register"
-                    element={<RegisterPage />}
-                />
-
-                <Route
-                    path="/profile"
-                    element={<ProfilePage />}
+                    path="/server-unavailable"
+                    element={<ServerUnavailablePage />}
                 />
 
                 <Route
                     path="/artworks/:id"
                     element={<ArtworkDetailsPage />}
+                />
+
+
+                {/* =====================================================
+                    CUSTOMER ROUTES
+                ===================================================== */}
+
+                <Route
+                    path="/orders"
+                    element={
+                        <ProtectedRoute
+                            allowedRoles={[
+                                "ROLE_CUSTOMER"
+                            ]}
+                        >
+                            <OrdersPage />
+                        </ProtectedRoute>
+                    }
                 />
 
                 <Route
@@ -153,6 +149,76 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
+
+                <Route
+                    path="/contact"
+                    element={
+                        <ProtectedRoute
+                            allowedRoles={[
+                                "ROLE_CUSTOMER"
+                            ]}
+                        >
+                            <ContactPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/contact/tickets/:ticketId"
+                    element={
+                        <ProtectedRoute
+                            allowedRoles={[
+                                "ROLE_CUSTOMER"
+                            ]}
+                        >
+                            <SupportTicketPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/settings"
+                    element={
+                        <ProtectedRoute
+                            allowedRoles={[
+                                "ROLE_CUSTOMER"
+                            ]}
+                        >
+                            <SettingsPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/profile"
+                    element={
+                        <ProtectedRoute
+                            allowedRoles={[
+                                "ROLE_CUSTOMER"
+                            ]}
+                        >
+                            <ProfilePage />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/change-password"
+                    element={
+                        <ProtectedRoute
+                            allowedRoles={[
+                                "ROLE_CUSTOMER"
+                            ]}
+                        >
+                            <ChangePasswordPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+
+                {/* =====================================================
+                    ARTIST ROUTES
+                ===================================================== */}
 
                 <Route
                     path="/artist/dashboard"
@@ -219,36 +285,110 @@ function App() {
                     }
                 />
 
+
+                {/* =====================================================
+                    ADMIN ROUTES
+                ===================================================== */}
+
                 <Route
                     path="/admin/dashboard"
-                    element={<AdminDashboard />}
+                    element={
+                        <ProtectedRoute
+                            allowedRoles={[
+                                "ROLE_ADMIN"
+                            ]}
+                        >
+                            <AdminDashboard />
+                        </ProtectedRoute>
+                    }
                 />
 
                 <Route
                     path="/admin/categories"
-                    element={<CategoriesPage />}
+                    element={
+                        <ProtectedRoute
+                            allowedRoles={[
+                                "ROLE_ADMIN"
+                            ]}
+                        >
+                            <CategoriesPage />
+                        </ProtectedRoute>
+                    }
                 />
 
                 <Route
                     path="/admin/users"
-                    element={<UsersPage />}
+                    element={
+                        <ProtectedRoute
+                            allowedRoles={[
+                                "ROLE_ADMIN"
+                            ]}
+                        >
+                            <UsersPage />
+                        </ProtectedRoute>
+                    }
                 />
 
                 <Route
                     path="/admin/artworks"
                     element={
-                        <ArtworksPage />
+                        <ProtectedRoute
+                            allowedRoles={[
+                                "ROLE_ADMIN"
+                            ]}
+                        >
+                            <ArtworksPage />
+                        </ProtectedRoute>
                     }
                 />
 
                 <Route
                     path="/admin/orders"
-                    element={<AdminOrdersPage />}
+                    element={
+                        <ProtectedRoute
+                            allowedRoles={[
+                                "ROLE_ADMIN"
+                            ]}
+                        >
+                            <AdminOrdersPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/admin/support"
+                    element={
+                        <ProtectedRoute
+                            allowedRoles={[
+                                "ROLE_ADMIN"
+                            ]}
+                        >
+                            <AdminSupportPage />
+                        </ProtectedRoute>
+                    }
                 />
 
                 <Route
                     path="/admin/announcements"
-                    element={<AdminAnnouncementsPage />}
+                    element={
+                        <ProtectedRoute
+                            allowedRoles={[
+                                "ROLE_ADMIN"
+                            ]}
+                        >
+                            <AdminAnnouncementsPage />
+                        </ProtectedRoute>
+                    }
+                />
+
+
+                {/* =====================================================
+                    404
+                ===================================================== */}
+
+                <Route
+                    path="*"
+                    element={<NotFoundPage />}
                 />
 
             </Routes>

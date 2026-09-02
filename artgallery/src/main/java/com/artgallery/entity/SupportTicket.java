@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -66,7 +67,7 @@ public class SupportTicket {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    private List<SupportMessage> messages;
+    private List<SupportMessage> messages=new ArrayList<>();;
 
 
     // =====================================================

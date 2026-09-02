@@ -4,6 +4,7 @@ import com.artgallery.dto.*;
 import com.artgallery.entity.Category;
 import com.artgallery.service.impl.AdminService;
 
+import com.artgallery.service.impl.AdminSupportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,9 @@ public class AdminController {
 
     @Autowired
     private AdminService adminService;
+
+    @Autowired
+    private AdminSupportService adminSupportService;
 
     @GetMapping("/dashboard")
     public AdminDashboardResponse dashboard() {
@@ -162,6 +166,53 @@ public class AdminController {
         return adminService.updateOrderStatus(
                 id,
                 String.valueOf(request.getStatus())
+        );
+    }
+
+    // =====================================================
+// SUPPORT
+// =====================================================
+
+    @GetMapping("/support/tickets")
+    public List<AdminSupportTicketResponse> getSupportTickets() {
+
+        return adminSupportService.getAllTickets();
+    }
+
+
+    @GetMapping("/support/tickets/{id}")
+    public AdminSupportTicketResponse getSupportTicket(
+            @PathVariable Long id
+    ) {
+
+        return adminSupportService.getTicket(id);
+    }
+
+
+    @PostMapping("/support/tickets/{id}/messages")
+    public String replyToSupportTicket(
+            @PathVariable Long id,
+            @RequestBody SupportMessageRequest request,
+            java.security.Principal principal
+    ) {
+
+        return adminSupportService.replyToTicket(
+                id,
+                principal.getName(),
+                request
+        );
+    }
+
+
+    @PutMapping("/support/tickets/{id}/status")
+    public String updateSupportTicketStatus(
+            @PathVariable Long id,
+            @RequestBody UpdateSupportStatusRequest request
+    ) {
+
+        return adminSupportService.updateTicketStatus(
+                id,
+                request.getStatus()
         );
     }
 }

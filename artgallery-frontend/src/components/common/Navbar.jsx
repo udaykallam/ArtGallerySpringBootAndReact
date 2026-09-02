@@ -120,18 +120,24 @@ function Navbar() {
                 </Link>
 
 
-                {/* =================================================
-                    CONTACT & SUPPORT
-                ================================================= */}
-
-                <Link to="/contact">
-                    Contact & Support
-                </Link>
-
 
                 {/* =================================================
                     CUSTOMER
                 ================================================= */}
+
+                {role === "ROLE_CUSTOMER" && (
+
+                    <>
+
+
+
+                        <Link to="/contact">
+                            Contact & Support
+                        </Link>
+
+                    </>
+
+                )}
 
                 {role === "ROLE_CUSTOMER" && (
 
@@ -201,6 +207,10 @@ function Navbar() {
 
                         <Link to="/admin/orders">
                             Orders
+                        </Link>
+
+                        <Link to="/admin/support">
+                            Support
                         </Link>
 
                         <Link to="/admin/announcements">
@@ -324,27 +334,6 @@ function Navbar() {
                                     Settings
 
                                 </Link>
-
-
-                                {/* =================================================
-                                    SUPPORT
-                                ================================================= */}
-
-                                <Link
-                                    to="/support"
-                                    onClick={() =>
-                                        setMenuOpen(false)
-                                    }
-                                >
-
-                                    <span>
-                                        💬
-                                    </span>
-
-                                    My Support Requests
-
-                                </Link>
-
 
                                 {/* =================================================
                                     CUSTOMER ORDERS
@@ -477,7 +466,7 @@ function Navbar() {
                 ) : (
 
                     <>
-                        
+
                         {/* LOGIN */}
 
                         <Link to="/login">
