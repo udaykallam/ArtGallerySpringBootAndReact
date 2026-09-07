@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -14,7 +14,7 @@ function ContactPage() {
 
 
     // =====================================================
-    // STATE
+    // SUPPORT TICKET STATE
     // =====================================================
 
     const [subject, setSubject] =
@@ -39,8 +39,263 @@ function ContactPage() {
         useState(false);
 
 
+    // =====================================================
+    // AURELIAN ASSISTANT STATE
+    // =====================================================
+
+    const [assistantQuestion, setAssistantQuestion] =
+        useState("");
+
+    const [assistantAnswer, setAssistantAnswer] =
+        useState(null);
+
+    const [assistantLoading, setAssistantLoading] =
+        useState(false);
+
+    const [assistantHelpful, setAssistantHelpful] =
+        useState(null);
+
+
     const token =
         localStorage.getItem("token");
+
+
+    // =====================================================
+    // FAQ DATABASE
+    // FRONTEND ONLY
+    // =====================================================
+
+    const faqs = useMemo(() => [
+
+        {
+            category: "ORDER",
+            question: "How can I track my order?",
+            keywords: [
+                "track",
+                "tracking",
+                "order status",
+                "where is my order",
+                "order location",
+                "delivery status"
+            ],
+            answer:
+                "You can track your order from the Orders section of your account. Open the order you want to track to view its current status and delivery information."
+        },
+
+        {
+            category: "ORDER",
+            question: "Can I cancel my order?",
+            keywords: [
+                "cancel",
+                "cancellation",
+                "cancel order",
+                "stop order"
+            ],
+            answer:
+                "You can request cancellation if your order has not already been processed or shipped. Open your order details to check whether cancellation is available. If you cannot cancel it there, please contact our support team."
+        },
+
+        {
+            category: "ORDER",
+            question: "How long does delivery take?",
+            keywords: [
+                "delivery",
+                "shipping",
+                "how long",
+                "arrive",
+                "when will",
+                "delivery time",
+                "shipping time"
+            ],
+            answer:
+                "Delivery time depends on your location and the artwork. You can view the latest delivery status from the Orders section of your account."
+        },
+
+        {
+            category: "ORDER",
+            question: "Where can I see my orders?",
+            keywords: [
+                "my orders",
+                "orders",
+                "order history",
+                "purchase history",
+                "previous orders"
+            ],
+            answer:
+                "You can view your orders from the Orders section of your Aurelian Gallery account. Each order contains its items, status and other available details."
+        },
+
+        {
+            category: "PAYMENT",
+            question: "What payment methods are accepted?",
+            keywords: [
+                "payment",
+                "pay",
+                "payment methods",
+                "credit card",
+                "debit card",
+                "upi",
+                "card"
+            ],
+            answer:
+                "The payment methods available to you are displayed during checkout. Select your preferred available payment method before placing your order."
+        },
+
+        {
+            category: "PAYMENT",
+            question: "What happens if my payment fails?",
+            keywords: [
+                "payment failed",
+                "payment failure",
+                "failed payment",
+                "transaction failed",
+                "payment error",
+                "payment problem"
+            ],
+            answer:
+                "If a payment fails, your order will not be successfully placed. Please try the payment again or use another available payment method. If money was deducted from your account, please contact our support team."
+        },
+
+        {
+            category: "PAYMENT",
+            question: "I was charged but my order was not created.",
+            keywords: [
+                "charged",
+                "money deducted",
+                "amount deducted",
+                "payment deducted",
+                "order not created",
+                "money taken",
+                "charged but",
+                "payment successful"
+            ],
+            answer:
+                "If your account was charged but an order was not created, please avoid making repeated payments. Check your Orders section first. If the order is still missing, create a support request and include the payment details so our team can investigate."
+        },
+
+        {
+            category: "ARTWORK",
+            question: "Are the artworks original?",
+            keywords: [
+                "original",
+                "authentic",
+                "authenticity",
+                "genuine",
+                "real artwork",
+                "original artwork"
+            ],
+            answer:
+                "Artwork authenticity and details are provided on the individual artwork page. Please review the artwork information carefully before purchasing."
+        },
+
+        {
+            category: "ARTWORK",
+            question: "Can I return an artwork?",
+            keywords: [
+                "return",
+                "refund",
+                "return artwork",
+                "send back",
+                "exchange"
+            ],
+            answer:
+                "Return eligibility depends on the order and the applicable return policy. Please check your order details or contact our support team for assistance with a return request."
+        },
+
+        {
+            category: "ARTWORK",
+            question: "Where can I find information about an artwork?",
+            keywords: [
+                "artwork information",
+                "artwork details",
+                "artist",
+                "art details",
+                "painting details",
+                "collection"
+            ],
+            answer:
+                "Open the artwork's details page to view the available information about the artwork, including its artist, description and other collection details."
+        },
+
+        {
+            category: "ACCOUNT",
+            question: "How do I change my password?",
+            keywords: [
+                "password",
+                "change password",
+                "new password",
+                "reset password",
+                "account password"
+            ],
+            answer:
+                "You can change your password from the Change Password section of your account. You will need to provide your current password and your new password."
+        },
+
+        {
+            category: "ACCOUNT",
+            question: "How do I deactivate my account?",
+            keywords: [
+                "deactivate",
+                "deactivation",
+                "disable account",
+                "close account",
+                "account deactivation"
+            ],
+            answer:
+                "You can deactivate your account from the Settings page. Account deactivation may require email OTP verification."
+        },
+
+        {
+            category: "ACCOUNT",
+            question: "How do I contact support?",
+            keywords: [
+                "support",
+                "contact support",
+                "customer service",
+                "help",
+                "contact"
+            ],
+            answer:
+                "You're already in the right place. You can create a support request using the Support Desk below. Your support requests will also appear in the My Support Requests section."
+        },
+
+        {
+            category: "TECHNICAL",
+            question: "The website is not working properly.",
+            keywords: [
+                "website",
+                "not working",
+                "technical",
+                "bug",
+                "error",
+                "broken",
+                "problem",
+                "page not loading"
+            ],
+            answer:
+                "Please try refreshing the page and signing in again. If the problem continues, create a support request and describe what happened, including any error message you saw."
+        }
+
+    ], []);
+
+
+    // =====================================================
+    // QUICK QUESTIONS
+    // =====================================================
+
+    const quickQuestions = [
+
+        "How can I track my order?",
+
+        "Can I cancel my order?",
+
+        "What payment methods are accepted?",
+
+        "Can I return an artwork?",
+
+        "How do I change my password?"
+
+    ];
 
 
     // =====================================================
@@ -90,6 +345,365 @@ function ContactPage() {
             setTicketsLoading(false);
 
         }
+
+    };
+
+
+    // =====================================================
+    // NORMALIZE FAQ TEXT
+    // =====================================================
+
+    const normalizeText = (text) => {
+
+        return text
+            .toLowerCase()
+            .replace(/[^\w\s]/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+
+    };
+
+
+    // =====================================================
+    // ASK AURELIAN ASSISTANT
+    // =====================================================
+
+    const askAssistant = async (question = assistantQuestion) => {
+
+        const cleanQuestion =
+            question.trim();
+
+        if (!cleanQuestion) {
+
+            toast.error(
+                "Please enter a question."
+            );
+
+            return;
+
+        }
+
+
+        setAssistantQuestion(
+            cleanQuestion
+        );
+
+        setAssistantLoading(true);
+
+        setAssistantAnswer(null);
+
+        setAssistantHelpful(null);
+
+
+        try {
+
+            const normalizedQuestion =
+                normalizeText(cleanQuestion);
+
+
+            const questionWords =
+                normalizedQuestion
+                    .split(" ")
+                    .filter(word => word.length > 2);
+
+
+            let bestFaq = null;
+
+            let bestScore = 0;
+
+
+            // =================================================
+            // MATCH FAQ
+            // =================================================
+
+            faqs.forEach((faq) => {
+
+                const normalizedFaqQuestion =
+                    normalizeText(
+                        faq.question
+                    );
+
+
+                let score = 0;
+
+
+                // Exact question
+                if (
+                    normalizedQuestion ===
+                    normalizedFaqQuestion
+                ) {
+
+                    score += 100;
+
+                }
+
+
+                // Question contains FAQ
+                if (
+                    normalizedQuestion.includes(
+                        normalizedFaqQuestion
+                    )
+                ) {
+
+                    score += 40;
+
+                }
+
+
+                // FAQ contains user's question
+                if (
+                    normalizedFaqQuestion.includes(
+                        normalizedQuestion
+                    )
+                ) {
+
+                    score += 35;
+
+                }
+
+
+                // Matching FAQ words
+                questionWords.forEach(word => {
+
+                    if (
+                        normalizedFaqQuestion.includes(
+                            word
+                        )
+                    ) {
+
+                        score += 5;
+
+                    }
+
+                });
+
+
+                // Matching keywords
+                faq.keywords.forEach(keyword => {
+
+                    const normalizedKeyword =
+                        normalizeText(keyword);
+
+
+                    if (
+                        normalizedQuestion.includes(
+                            normalizedKeyword
+                        )
+                    ) {
+
+                        score += 15;
+
+                    }
+
+                });
+
+
+                if (score > bestScore) {
+
+                    bestScore = score;
+
+                    bestFaq = faq;
+
+                }
+
+            });
+
+
+            // =================================================
+            // SMALL DELAY
+            // Gives assistant a natural feel
+            // =================================================
+
+            await new Promise(
+                resolve =>
+                    setTimeout(resolve, 350)
+            );
+
+
+            if (
+                bestFaq &&
+                bestScore >= 15
+            ) {
+
+                setAssistantAnswer({
+
+                    found: true,
+
+                    question:
+                        bestFaq.question,
+
+                    answer:
+                        bestFaq.answer,
+
+                    category:
+                        bestFaq.category
+
+                });
+
+            } else {
+
+                setAssistantAnswer({
+
+                    found: false,
+
+                    question:
+                        cleanQuestion,
+
+                    answer:
+                        "I'm sorry, I couldn't find a reliable answer to that question in our FAQ. You can create a support request below and our team will be happy to help."
+
+                });
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Assistant error:",
+                error
+            );
+
+            setAssistantAnswer({
+
+                found: false,
+
+                question:
+                    cleanQuestion,
+
+                answer:
+                    "I'm unable to find an answer right now. Please create a support request and our team will assist you."
+
+            });
+
+        } finally {
+
+            setAssistantLoading(false);
+
+        }
+
+    };
+
+
+    // =====================================================
+    // QUICK QUESTION
+    // =====================================================
+
+    const askQuickQuestion = (question) => {
+
+        setAssistantQuestion(
+            question
+        );
+
+        askAssistant(question);
+
+    };
+
+
+    // =====================================================
+    // USE CATEGORY
+    // =====================================================
+
+    const useTopic = (topic) => {
+
+        const questions = {
+
+            ORDER:
+                "How can I track my order?",
+
+            PAYMENT:
+                "What payment methods are accepted?",
+
+            ARTWORK:
+                "Are the artworks original?",
+
+            ACCOUNT:
+                "How do I change my password?",
+
+            TECHNICAL:
+                "The website is not working properly."
+
+        };
+
+
+        const question =
+            questions[topic];
+
+
+        if (question) {
+
+            askQuickQuestion(
+                question
+            );
+
+        }
+
+    };
+
+
+    // =====================================================
+    // CREATE SUPPORT FROM ASSISTANT
+    // =====================================================
+
+    const createSupportFromAssistant = () => {
+
+        const question =
+            assistantAnswer?.question ||
+            assistantQuestion;
+
+
+        setSubject(
+            question
+        );
+
+
+        setMessage(
+            assistantQuestion
+                ? `I need help with: ${assistantQuestion}`
+                : ""
+        );
+
+
+        if (
+            assistantAnswer?.category
+        ) {
+
+            const validCategories = [
+                "ORDER",
+                "PAYMENT",
+                "ARTWORK",
+                "ACCOUNT",
+                "TECHNICAL"
+            ];
+
+
+            if (
+                validCategories.includes(
+                    assistantAnswer.category
+                )
+            ) {
+
+                setCategory(
+                    assistantAnswer.category
+                );
+
+            }
+
+        }
+
+
+        setTimeout(() => {
+
+            document
+                .getElementById(
+                    "support-desk"
+                )
+                ?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+
+        }, 100);
+
     };
 
 
@@ -111,6 +725,7 @@ function ContactPage() {
             navigate("/login");
 
             return;
+
         }
 
 
@@ -121,6 +736,7 @@ function ContactPage() {
             );
 
             return;
+
         }
 
 
@@ -131,6 +747,7 @@ function ContactPage() {
             );
 
             return;
+
         }
 
 
@@ -154,6 +771,7 @@ function ContactPage() {
 
                     message:
                         message.trim()
+
                 });
 
 
@@ -162,9 +780,7 @@ function ContactPage() {
             );
 
 
-            // =================================================
-            // RESET FORM
-            // =================================================
+            // Reset form
 
             setSubject("");
 
@@ -175,16 +791,12 @@ function ContactPage() {
             setMessage("");
 
 
-            // =================================================
-            // REFRESH TICKETS
-            // =================================================
+            // Refresh tickets
 
             await loadTickets();
 
 
-            // =================================================
-            // SCROLL TO TICKETS
-            // =================================================
+            // Scroll
 
             setTimeout(() => {
 
@@ -223,6 +835,7 @@ function ContactPage() {
             setLoading(false);
 
         }
+
     };
 
 
@@ -233,8 +846,11 @@ function ContactPage() {
     const formatDate = (date) => {
 
         if (!date) {
+
             return "";
+
         }
+
 
         return new Date(date)
             .toLocaleDateString(
@@ -245,6 +861,7 @@ function ContactPage() {
                     year: "numeric"
                 }
             );
+
     };
 
 
@@ -257,21 +874,22 @@ function ContactPage() {
         switch (status) {
 
             case "OPEN":
-                return "support-status-open";
+                return "contact-status-open";
 
             case "IN_PROGRESS":
-                return "support-status-progress";
+                return "contact-status-progress";
 
             case "RESOLVED":
-                return "support-status-resolved";
+                return "contact-status-resolved";
 
             case "CLOSED":
-                return "support-status-closed";
+                return "contact-status-closed";
 
             default:
                 return "";
 
         }
+
     };
 
 
@@ -294,616 +912,18 @@ function ContactPage() {
 
     return (
 
-        <div className="support-page">
+        <div className="contact-page">
 
-
-            {/* =================================================
-                INTERNAL CSS
-            ================================================= */}
-
-            <style>{`
-
-                .support-page {
-                    min-height: calc(100vh - 80px);
-                    padding: 70px 30px 100px;
-                    background:
-                        radial-gradient(
-                            circle at top,
-                            rgba(255,255,255,0.025),
-                            transparent 40%
-                        );
-                }
-
-
-                .support-container {
-                    width: 100%;
-                    max-width: 1180px;
-                    margin: 0 auto;
-                }
-
-
-                /* =================================================
-                   HERO
-                ================================================= */
-
-                .support-hero {
-                    text-align: center;
-                    max-width: 760px;
-                    margin: 0 auto 65px;
-                }
-
-
-                .support-eyebrow {
-                    font-size: 12px;
-                    letter-spacing: 3px;
-                    text-transform: uppercase;
-                    color: #b58a45;
-                    margin-bottom: 15px;
-                }
-
-
-                .support-hero h1 {
-                    margin: 0;
-                    font-family:
-                        "Cormorant Garamond",
-                        serif;
-                    font-size: clamp(
-                        42px,
-                        6vw,
-                        68px
-                    );
-                    font-weight: 400;
-                    letter-spacing: -1px;
-                }
-
-
-                .support-hero p {
-                    margin: 20px auto 0;
-                    max-width: 620px;
-                    color: #9ca39e;
-                    font-size: 16px;
-                    line-height: 1.8;
-                }
-
-
-                /* =================================================
-                   QUICK HELP
-                ================================================= */
-
-                .support-topics {
-                    display: grid;
-                    grid-template-columns:
-                        repeat(5, 1fr);
-                    gap: 12px;
-                    margin-bottom: 60px;
-                }
-
-
-                .support-topic {
-                    padding: 22px 15px;
-                    background: #111512;
-                    border: 1px solid #252b27;
-                    text-align: center;
-                    transition:
-                        border-color 0.2s ease,
-                        transform 0.2s ease,
-                        background 0.2s ease;
-                }
-
-
-                .support-topic:hover {
-                    border-color: #806331;
-                    background: #151915;
-                    transform: translateY(-3px);
-                }
-
-
-                .support-topic-icon {
-                    font-size: 23px;
-                    margin-bottom: 10px;
-                }
-
-
-                .support-topic-title {
-                    font-family:
-                        "Cormorant Garamond",
-                        serif;
-                    font-size: 18px;
-                }
-
-
-                .support-topic-text {
-                    margin-top: 5px;
-                    color: #707771;
-                    font-size: 11px;
-                    line-height: 1.4;
-                }
-
-
-                /* =================================================
-                   MAIN GRID
-                ================================================= */
-
-                .support-grid {
-                    display: grid;
-                    grid-template-columns:
-                        minmax(0, 1.35fr)
-                        minmax(280px, 0.65fr);
-                    gap: 25px;
-                    align-items: start;
-                }
-
-
-                /* =================================================
-                   FORM CARD
-                ================================================= */
-
-                .support-card {
-                    background: #111512;
-                    border: 1px solid #252b27;
-                    padding: 38px;
-                }
-
-
-                .support-card-header {
-                    margin-bottom: 30px;
-                }
-
-
-                .support-card-eyebrow {
-                    color: #b58a45;
-                    font-size: 11px;
-                    letter-spacing: 2.5px;
-                    text-transform: uppercase;
-                    margin-bottom: 9px;
-                }
-
-
-                .support-card h2 {
-                    margin: 0;
-                    font-family:
-                        "Cormorant Garamond",
-                        serif;
-                    font-size: 32px;
-                    font-weight: 400;
-                }
-
-
-                .support-card-subtitle {
-                    margin-top: 9px;
-                    color: #777e78;
-                    font-size: 14px;
-                    line-height: 1.6;
-                }
-
-
-                /* =================================================
-                   FORM
-                ================================================= */
-
-                .support-form {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 21px;
-                }
-
-
-                .support-field {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 8px;
-                }
-
-
-                .support-field label {
-                    font-size: 11px;
-                    letter-spacing: 1.7px;
-                    text-transform: uppercase;
-                    color: #8d948f;
-                }
-
-
-                .support-field input,
-                .support-field select,
-                .support-field textarea {
-                    width: 100%;
-                    box-sizing: border-box;
-                    padding: 13px 14px;
-                    border: 1px solid #303631;
-                    border-radius: 0;
-                    outline: none;
-                    background: #0d100e;
-                    color: #e9ebe7;
-                    font-family: inherit;
-                    font-size: 14px;
-                    transition:
-                        border-color 0.2s ease,
-                        background 0.2s ease;
-                }
-
-
-                .support-field input:focus,
-                .support-field select:focus,
-                .support-field textarea:focus {
-                    border-color: #92713d;
-                    background: #101410;
-                }
-
-
-                .support-field textarea {
-                    min-height: 150px;
-                    resize: vertical;
-                    line-height: 1.6;
-                }
-
-
-                .support-field-row {
-                    display: grid;
-                    grid-template-columns:
-                        1fr 1fr;
-                    gap: 18px;
-                }
-
-
-                .support-submit {
-                    width: 100%;
-                    margin-top: 5px;
-                    padding: 15px 20px;
-                    border: 1px solid #a47a3c;
-                    background: #27332d;
-                    color: #f4f3ed;
-                    font-family: inherit;
-                    font-size: 12px;
-                    letter-spacing: 1.8px;
-                    text-transform: uppercase;
-                    cursor: pointer;
-                    transition:
-                        background 0.2s ease,
-                        border-color 0.2s ease;
-                }
-
-
-                .support-submit:hover {
-                    background: #334139;
-                    border-color: #c09a5d;
-                }
-
-
-                .support-submit:disabled {
-                    opacity: 0.55;
-                    cursor: not-allowed;
-                }
-
-
-                /* =================================================
-                   SIDE INFO
-                ================================================= */
-
-                .support-side {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 20px;
-                }
-
-
-                .support-info-card {
-                    padding: 28px;
-                    background: #111512;
-                    border: 1px solid #252b27;
-                }
-
-
-                .support-info-icon {
-                    width: 45px;
-                    height: 45px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin-bottom: 18px;
-                    border: 1px solid #393f3a;
-                    background: #0d100e;
-                    font-size: 19px;
-                }
-
-
-                .support-info-card h3 {
-                    margin: 0 0 8px;
-                    font-family:
-                        "Cormorant Garamond",
-                        serif;
-                    font-size: 23px;
-                    font-weight: 400;
-                }
-
-
-                .support-info-card p {
-                    margin: 0;
-                    color: #7c837e;
-                    font-size: 13px;
-                    line-height: 1.7;
-                }
-
-
-                .support-ai-card {
-                    border-color: #66502e;
-                    background:
-                        linear-gradient(
-                            135deg,
-                            #141713,
-                            #101310
-                        );
-                }
-
-
-                .support-ai-card .support-info-icon {
-                    border-color: #66502e;
-                    color: #c19a5b;
-                }
-
-
-                .support-ai-label {
-                    color: #b58a45;
-                    font-size: 10px;
-                    letter-spacing: 2px;
-                    text-transform: uppercase;
-                    margin-bottom: 7px;
-                }
-
-
-                /* =================================================
-                   MY TICKETS
-                ================================================= */
-
-                .support-tickets-section {
-                    margin-top: 70px;
-                }
-
-
-                .support-tickets-header {
-                    margin-bottom: 25px;
-                }
-
-
-                .support-tickets-header .support-card-eyebrow {
-                    margin-bottom: 8px;
-                }
-
-
-                .support-tickets-header h2 {
-                    margin: 0;
-                    font-family:
-                        "Cormorant Garamond",
-                        serif;
-                    font-size: 35px;
-                    font-weight: 400;
-                }
-
-
-                .support-ticket-list {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 10px;
-                }
-
-
-                .support-ticket {
-                    display: grid;
-                    grid-template-columns:
-                        80px
-                        1fr
-                        auto;
-                    gap: 20px;
-                    align-items: center;
-                    padding: 20px 22px;
-                    background: #111512;
-                    border: 1px solid #252b27;
-                    cursor: pointer;
-                    transition:
-                        border-color 0.2s ease,
-                        background 0.2s ease;
-                }
-
-
-                .support-ticket:hover {
-                    border-color: #67512f;
-                    background: #151915;
-                }
-
-
-                .support-ticket-number {
-                    color: #b58a45;
-                    font-size: 11px;
-                    letter-spacing: 1px;
-                }
-
-
-                .support-ticket-subject {
-                    font-family:
-                        "Cormorant Garamond",
-                        serif;
-                    font-size: 20px;
-                    margin-bottom: 4px;
-                }
-
-
-                .support-ticket-meta {
-                    display: flex;
-                    gap: 15px;
-                    flex-wrap: wrap;
-                    color: #6e756f;
-                    font-size: 11px;
-                }
-
-
-                .support-ticket-status {
-                    padding: 6px 10px;
-                    border: 1px solid #343a35;
-                    font-size: 10px;
-                    letter-spacing: 1px;
-                    text-transform: uppercase;
-                }
-
-
-                .support-status-open {
-                    color: #c09a5d;
-                    border-color: #66502e;
-                }
-
-
-                .support-status-progress {
-                    color: #aaa;
-                }
-
-
-                .support-status-resolved {
-                    color: #91a996;
-                    border-color: #405447;
-                }
-
-
-                .support-status-closed {
-                    color: #707771;
-                }
-
-
-                .support-empty {
-                    padding: 45px 25px;
-                    text-align: center;
-                    background: #111512;
-                    border: 1px solid #252b27;
-                }
-
-
-                .support-empty-mark {
-                    color: #8f6c36;
-                    font-size: 25px;
-                    margin-bottom: 10px;
-                }
-
-
-                .support-empty h3 {
-                    margin: 0 0 7px;
-                    font-family:
-                        "Cormorant Garamond",
-                        serif;
-                    font-size: 24px;
-                    font-weight: 400;
-                }
-
-
-                .support-empty p {
-                    margin: 0;
-                    color: #707771;
-                    font-size: 13px;
-                }
-
-
-                /* =================================================
-                   LOGIN NOTICE
-                ================================================= */
-
-                .support-login-notice {
-                    margin-top: 25px;
-                    padding: 18px 20px;
-                    border: 1px solid #393f3a;
-                    background: #111512;
-                    color: #7e857f;
-                    font-size: 13px;
-                    line-height: 1.6;
-                }
-
-
-                .support-login-notice button {
-                    margin-left: 5px;
-                    padding: 0;
-                    border: 0;
-                    background: transparent;
-                    color: #b58a45;
-                    font-family: inherit;
-                    cursor: pointer;
-                }
-
-
-                /* =================================================
-                   LOADING
-                ================================================= */
-
-                .support-loading {
-                    padding: 30px;
-                    text-align: center;
-                    color: #707771;
-                    font-size: 13px;
-                }
-
-
-                /* =================================================
-                   RESPONSIVE
-                ================================================= */
-
-                @media (max-width: 900px) {
-
-                    .support-topics {
-                        grid-template-columns:
-                            repeat(3, 1fr);
-                    }
-
-
-                    .support-grid {
-                        grid-template-columns: 1fr;
-                    }
-
-                }
-
-
-                @media (max-width: 600px) {
-
-                    .support-page {
-                        padding:
-                            45px 16px 70px;
-                    }
-
-
-                    .support-topics {
-                        grid-template-columns:
-                            repeat(2, 1fr);
-                    }
-
-
-                    .support-card {
-                        padding: 25px 20px;
-                    }
-
-
-                    .support-field-row {
-                        grid-template-columns: 1fr;
-                    }
-
-
-                    .support-ticket {
-                        grid-template-columns: 1fr;
-                        gap: 9px;
-                    }
-
-
-                    .support-ticket-status {
-                        width: fit-content;
-                    }
-
-                }
-
-            `}</style>
-
-
-            <div className="support-container">
+            <div className="contact-container">
 
 
                 {/* =================================================
                     HERO
                 ================================================= */}
 
-                <section className="support-hero">
+                <section className="contact-hero">
 
-                    <div className="support-eyebrow">
+                    <div className="contact-eyebrow">
                         Aurelian Concierge
                     </div>
 
@@ -925,90 +945,105 @@ function ContactPage() {
                     QUICK TOPICS
                 ================================================= */}
 
-                <section className="support-topics">
+                <section className="contact-topics">
 
-                    <div className="support-topic">
-
-                        <div className="support-topic-icon">
+                    <div
+                        className="contact-topic"
+                        onClick={() =>
+                            useTopic("ORDER")
+                        }
+                    >
+                        <div className="contact-topic-icon">
                             📦
                         </div>
 
-                        <div className="support-topic-title">
+                        <div className="contact-topic-title">
                             Orders
                         </div>
 
-                        <div className="support-topic-text">
+                        <div className="contact-topic-text">
                             Delivery & tracking
                         </div>
-
                     </div>
 
 
-                    <div className="support-topic">
-
-                        <div className="support-topic-icon">
+                    <div
+                        className="contact-topic"
+                        onClick={() =>
+                            useTopic("PAYMENT")
+                        }
+                    >
+                        <div className="contact-topic-icon">
                             💳
                         </div>
 
-                        <div className="support-topic-title">
+                        <div className="contact-topic-title">
                             Payments
                         </div>
 
-                        <div className="support-topic-text">
+                        <div className="contact-topic-text">
                             Payment assistance
                         </div>
-
                     </div>
 
 
-                    <div className="support-topic">
-
-                        <div className="support-topic-icon">
+                    <div
+                        className="contact-topic"
+                        onClick={() =>
+                            useTopic("ARTWORK")
+                        }
+                    >
+                        <div className="contact-topic-icon">
                             🎨
                         </div>
 
-                        <div className="support-topic-title">
+                        <div className="contact-topic-title">
                             Artwork
                         </div>
 
-                        <div className="support-topic-text">
+                        <div className="contact-topic-text">
                             Collection questions
                         </div>
-
                     </div>
 
 
-                    <div className="support-topic">
-
-                        <div className="support-topic-icon">
+                    <div
+                        className="contact-topic"
+                        onClick={() =>
+                            useTopic("ACCOUNT")
+                        }
+                    >
+                        <div className="contact-topic-icon">
                             👤
                         </div>
 
-                        <div className="support-topic-title">
+                        <div className="contact-topic-title">
                             Account
                         </div>
 
-                        <div className="support-topic-text">
+                        <div className="contact-topic-text">
                             Profile & security
                         </div>
-
                     </div>
 
 
-                    <div className="support-topic">
-
-                        <div className="support-topic-icon">
+                    <div
+                        className="contact-topic"
+                        onClick={() =>
+                            useTopic("TECHNICAL")
+                        }
+                    >
+                        <div className="contact-topic-icon">
                             ⚙
                         </div>
 
-                        <div className="support-topic-title">
+                        <div className="contact-topic-title">
                             Technical
                         </div>
 
-                        <div className="support-topic-text">
+                        <div className="contact-topic-text">
                             Website assistance
                         </div>
-
                     </div>
 
                 </section>
@@ -1018,18 +1053,21 @@ function ContactPage() {
                     MAIN CONTENT
                 ================================================= */}
 
-                <section className="support-grid">
+                <section className="contact-grid">
 
 
                     {/* =================================================
                         CONTACT FORM
                     ================================================= */}
 
-                    <div className="support-card">
+                    <div
+                        className="contact-card"
+                        id="support-desk"
+                    >
 
-                        <div className="support-card-header">
+                        <div className="contact-card-header">
 
-                            <div className="support-card-eyebrow">
+                            <div className="contact-card-eyebrow">
                                 Support Desk
                             </div>
 
@@ -1037,7 +1075,7 @@ function ContactPage() {
                                 How can we help?
                             </h2>
 
-                            <p className="support-card-subtitle">
+                            <p className="contact-card-subtitle">
                                 Tell us what you need assistance
                                 with and our team will get back
                                 to you.
@@ -1049,14 +1087,11 @@ function ContactPage() {
                         {token ? (
 
                             <form
-                                className="support-form"
+                                className="contact-form"
                                 onSubmit={submitTicket}
                             >
 
-
-                                {/* SUBJECT */}
-
-                                <div className="support-field">
+                                <div className="contact-field">
 
                                     <label>
                                         Subject
@@ -1077,11 +1112,9 @@ function ContactPage() {
                                 </div>
 
 
-                                {/* CATEGORY + ORDER */}
+                                <div className="contact-field-row">
 
-                                <div className="support-field-row">
-
-                                    <div className="support-field">
+                                    <div className="contact-field">
 
                                         <label>
                                             Category
@@ -1125,7 +1158,7 @@ function ContactPage() {
                                     </div>
 
 
-                                    <div className="support-field">
+                                    <div className="contact-field">
 
                                         <label>
                                             Order ID
@@ -1153,9 +1186,7 @@ function ContactPage() {
                                 </div>
 
 
-                                {/* MESSAGE */}
-
-                                <div className="support-field">
+                                <div className="contact-field">
 
                                     <label>
                                         Message
@@ -1175,11 +1206,9 @@ function ContactPage() {
                                 </div>
 
 
-                                {/* SUBMIT */}
-
                                 <button
                                     type="submit"
-                                    className="support-submit"
+                                    className="contact-submit"
                                     disabled={loading}
                                 >
 
@@ -1194,7 +1223,7 @@ function ContactPage() {
 
                         ) : (
 
-                            <div className="support-login-notice">
+                            <div className="contact-login-notice">
 
                                 Please login to create a
                                 support request.
@@ -1216,15 +1245,15 @@ function ContactPage() {
 
 
                     {/* =================================================
-                        SIDE INFORMATION
+                        SIDE INFORMATION + ASSISTANT
                     ================================================= */}
 
-                    <aside className="support-side">
+                    <aside className="contact-side">
 
 
-                        <div className="support-info-card">
+                        <div className="contact-info-card">
 
-                            <div className="support-info-icon">
+                            <div className="contact-info-icon">
                                 ✉
                             </div>
 
@@ -1241,9 +1270,9 @@ function ContactPage() {
                         </div>
 
 
-                        <div className="support-info-card">
+                        <div className="contact-info-card">
 
-                            <div className="support-info-icon">
+                            <div className="contact-info-icon">
                                 ◷
                             </div>
 
@@ -1260,27 +1289,231 @@ function ContactPage() {
                         </div>
 
 
-                        <div className="support-info-card support-ai-card">
+                        {/* =================================================
+                            AURELIAN ASSISTANT
+                        ================================================= */}
 
-                            <div className="support-info-icon">
+                        <div className="contact-info-card contact-ai-card">
+
+                            <div className="contact-info-icon">
                                 ✦
                             </div>
 
-                            <div className="support-ai-label">
-                                Coming Soon
+                            <div className="contact-ai-label">
+                                Aurelian Concierge
                             </div>
 
                             <h3>
-                                Aurelian AI
+                                How may I assist you?
                             </h3>
 
-                            <p>
-                                Need a quick answer? Our AI
-                                support assistant will soon be
-                                available to help with orders,
-                                artwork information, account
-                                questions and more.
+                            <p className="contact-ai-intro">
+                                Ask a question about orders,
+                                payments, artworks, your account,
+                                or website assistance.
                             </p>
+
+
+                            {/* ASK FORM */}
+
+                            <form
+                                className="contact-ai-form"
+                                onSubmit={(e) => {
+
+                                    e.preventDefault();
+
+                                    askAssistant();
+
+                                }}
+                            >
+
+                                <input
+                                    className="contact-ai-input"
+                                    type="text"
+                                    value={assistantQuestion}
+                                    onChange={(e) =>
+                                        setAssistantQuestion(
+                                            e.target.value
+                                        )
+                                    }
+                                    placeholder="Ask something..."
+                                    maxLength={250}
+                                />
+
+                                <button
+                                    type="submit"
+                                    className="contact-ai-ask"
+                                    disabled={
+                                        assistantLoading
+                                    }
+                                >
+
+                                    {assistantLoading
+                                        ? "..."
+                                        : "Ask"
+                                    }
+
+                                </button>
+
+                            </form>
+
+
+                            {/* QUICK QUESTIONS */}
+
+                            <div className="contact-ai-suggestions">
+
+                                {quickQuestions.map(
+                                    (question) => (
+
+                                        <button
+                                            key={question}
+                                            type="button"
+                                            className="contact-ai-suggestion"
+                                            onClick={() =>
+                                                askQuickQuestion(
+                                                    question
+                                                )
+                                            }
+                                        >
+
+                                            {question}
+
+                                        </button>
+
+                                    )
+                                )}
+
+                            </div>
+
+
+                            {/* THINKING */}
+
+                            {assistantLoading && (
+
+                                <div className="contact-ai-thinking">
+
+                                    Searching the Aurelian
+                                    knowledge desk...
+
+                                </div>
+
+                            )}
+
+
+                            {/* ANSWER */}
+
+                            {!assistantLoading &&
+                                assistantAnswer && (
+
+                                    <div className="contact-ai-answer">
+
+                                        <div className="contact-ai-answer-label">
+
+                                            {assistantAnswer.found
+                                                ? "Aurelian Answer"
+                                                : "Aurelian Concierge"
+                                            }
+
+                                        </div>
+
+
+                                        <div className="contact-ai-answer-question">
+
+                                            {assistantAnswer.question}
+
+                                        </div>
+
+
+                                        <div className="contact-ai-answer-text">
+
+                                            {assistantAnswer.answer}
+
+                                        </div>
+
+
+                                        {assistantAnswer.category && (
+
+                                            <div className="contact-ai-category">
+
+                                                {assistantAnswer.category}
+
+                                            </div>
+
+                                        )}
+
+
+                                        {/* HELPFUL */}
+
+                                        <div className="contact-ai-helpful">
+
+                                            <span>
+                                                Was this helpful?
+                                            </span>
+
+                                            <button
+                                                type="button"
+                                                className={
+                                                    assistantHelpful === true
+                                                        ? "active"
+                                                        : ""
+                                                }
+                                                onClick={() => {
+
+                                                    setAssistantHelpful(
+                                                        true
+                                                    );
+
+                                                    toast.success(
+                                                        "Thank you for your feedback."
+                                                    );
+
+                                                }}
+                                            >
+                                                Yes
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                className={
+                                                    assistantHelpful === false
+                                                        ? "active"
+                                                        : ""
+                                                }
+                                                onClick={() => {
+
+                                                    setAssistantHelpful(
+                                                        false
+                                                    );
+
+                                                }}
+                                            >
+                                                No
+                                            </button>
+
+                                        </div>
+
+
+                                        {/* SUPPORT ESCALATION */}
+
+                                        {!assistantAnswer.found && (
+
+                                            <button
+                                                type="button"
+                                                className="contact-ai-support-button"
+                                                onClick={
+                                                    createSupportFromAssistant
+                                                }
+                                            >
+
+                                                Create Support Request
+
+                                            </button>
+
+                                        )}
+
+                                    </div>
+
+                                )}
 
                         </div>
 
@@ -1296,13 +1529,13 @@ function ContactPage() {
                 {token && (
 
                     <section
-                        className="support-tickets-section"
+                        className="contact-tickets-section"
                         id="my-support-tickets"
                     >
 
-                        <div className="support-tickets-header">
+                        <div className="contact-tickets-header">
 
-                            <div className="support-card-eyebrow">
+                            <div className="contact-card-eyebrow">
                                 Your Requests
                             </div>
 
@@ -1315,15 +1548,15 @@ function ContactPage() {
 
                         {ticketsLoading ? (
 
-                            <div className="support-loading">
+                            <div className="contact-loading">
                                 Loading your support requests...
                             </div>
 
                         ) : tickets.length === 0 ? (
 
-                            <div className="support-empty">
+                            <div className="contact-empty">
 
-                                <div className="support-empty-mark">
+                                <div className="contact-empty-mark">
                                     ✦
                                 </div>
 
@@ -1341,14 +1574,14 @@ function ContactPage() {
 
                         ) : (
 
-                            <div className="support-ticket-list">
+                            <div className="contact-ticket-list">
 
                                 {tickets.map(
                                     ticket => (
 
                                         <div
                                             key={ticket.id}
-                                            className="support-ticket"
+                                            className="contact-ticket"
                                             onClick={() =>
                                                 openTicket(
                                                     ticket.id
@@ -1356,7 +1589,7 @@ function ContactPage() {
                                             }
                                         >
 
-                                            <div className="support-ticket-number">
+                                            <div className="contact-ticket-number">
 
                                                 #
                                                 {ticket.id}
@@ -1366,14 +1599,14 @@ function ContactPage() {
 
                                             <div>
 
-                                                <div className="support-ticket-subject">
+                                                <div className="contact-ticket-subject">
 
                                                     {ticket.subject}
 
                                                 </div>
 
 
-                                                <div className="support-ticket-meta">
+                                                <div className="contact-ticket-meta">
 
                                                     <span>
                                                         {ticket.category}
@@ -1392,7 +1625,7 @@ function ContactPage() {
 
                                             <div
                                                 className={
-                                                    `support-ticket-status ${
+                                                    `contact-ticket-status ${
                                                         getStatusClass(
                                                             ticket.status
                                                         )
@@ -1420,7 +1653,9 @@ function ContactPage() {
             </div>
 
         </div>
+
     );
+
 }
 
 
