@@ -17,10 +17,6 @@ public class AccountController {
     private final AccountService accountService;
 
 
-    // =====================================================
-    // DEACTIVATE ACCOUNT
-    // =====================================================
-
     @PutMapping("/deactivate")
     public ResponseEntity<String> deactivateAccount(
             Principal principal
@@ -34,11 +30,6 @@ public class AccountController {
                 "Your account has been deactivated."
         );
     }
-
-
-    // =====================================================
-    // DELETE ACCOUNT
-    // =====================================================
 
     @DeleteMapping
     public ResponseEntity<String> deleteAccount(

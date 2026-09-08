@@ -22,7 +22,6 @@ public class WebSocketConfig
     private WebSocketAuthInterceptor
             webSocketAuthInterceptor;
 
-
     @Override
     public void configureMessageBroker(
             MessageBrokerRegistry config
@@ -41,11 +40,6 @@ public class WebSocketConfig
                 "/user"
         );
     }
-
-
-    // ==========================================
-    // STOMP CHANNEL INTERCEPTOR
-    // ==========================================
 
     @Override
     public void configureClientInboundChannel(
