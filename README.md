@@ -1,42 +1,50 @@
-````markdown
 # 🎨 Aurelian Gallery
 
-### Art Gallery Management & E-Commerce Platform
+<p align="center">
+  <strong>Art Gallery Management & E-Commerce Platform</strong>
+</p>
 
-A full-stack Art Gallery Management System built with **Spring Boot, React, and MySQL**.
+<p align="center">
+  A full-stack art gallery platform built with <strong>Spring Boot</strong>, <strong>React</strong>, and <strong>MySQL</strong>.
+</p>
 
-Aurelian Gallery provides a complete digital platform for customers, artists, and administrators to manage, showcase, purchase, and support artwork through a modern web application.
+<p align="center">
+  <a href="https://github.com/udaykallam/ArtGallerySpringBootAndReact">
+    <img src="https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github" alt="GitHub Repository">
+  </a>
+  <img src="https://img.shields.io/badge/Java-17%2B-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java">
+  <img src="https://img.shields.io/badge/Spring%20Boot-Backend-6DB33F?style=for-the-badge&logo=springboot&logoColor=white" alt="Spring Boot">
+  <img src="https://img.shields.io/badge/React-Frontend-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React">
+  <img src="https://img.shields.io/badge/MySQL-Database-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
+</p>
 
 ---
 
 ## ✨ Overview
 
-Aurelian Gallery is designed as a role-based art marketplace where:
+**Aurelian Gallery** is a role-based Art Gallery Management and E-Commerce platform designed for **customers, artists, and administrators**.
 
-- 👤 Customers can browse and purchase artworks
-- 🎨 Artists can upload and manage their artwork
-- 🛡️ Administrators can manage users, artworks, categories, orders, and announcements
-- 🔐 Users can securely authenticate using JWT or Google OAuth
-- 📧 Email verification, password recovery, and account reactivation are supported
-- 🛒 Customers can manage carts and wishlists
-- ⭐ Customers can review artworks
-- 📦 Orders can be tracked through their lifecycle
-- 💬 Customers can communicate with support through support tickets
-- 🔔 Users receive notifications for important account and order events
+The platform combines artwork discovery, shopping, order management, artist tools, administration, authentication, customer support, email communication, and real-time notifications into a single full-stack application.
 
-The application follows a layered backend architecture and a component-based React frontend.
+### 👥 Platform Roles
+
+| Role | Main Capabilities |
+|---|---|
+| 👤 **Customer** | Browse artworks, wishlist, cart, orders, reviews, notifications, support |
+| 🎨 **Artist** | Upload and manage artwork, view related orders |
+| 🛡️ **Admin** | Manage users, artworks, categories, orders, support, announcements |
 
 ---
 
 # 🚀 Features
 
-## 👤 Customer Features
+## 👤 Customer
 
-### Authentication & Account
+### 🔐 Authentication & Account
 
 - User registration
 - Email verification
-- JWT-based authentication
+- JWT authentication
 - Google OAuth 2.0 login
 - Forgot password
 - OTP-based password reset
@@ -46,18 +54,19 @@ The application follows a layered backend architecture and a component-based Rea
 - Protected routes
 - Role-based authorization
 
-### Artwork
+### 🖼️ Artwork
 
 - Browse artworks
-- View artwork details
 - Artwork search and filtering
+- View artwork details
 - View artwork categories
 - View artist information
-- Artwork reviews
+- Submit artwork reviews
 - Edit personal reviews
 - Delete personal reviews
+- One review per customer per artwork
 
-### Shopping
+### 🛒 Shopping
 
 - Add artworks to cart
 - Remove artworks from cart
@@ -66,30 +75,28 @@ The application follows a layered backend architecture and a component-based Rea
 - View order history
 - Track order status
 
-### Notifications
+### 🔔 Notifications
 
 - Real-time notifications
 - Order notifications
 - Account-related notifications
 - Read/unread notification state
 
-### Customer Support
+### 💬 Customer Support
 
 - Create support tickets
 - Select support categories
 - Associate tickets with orders
-- View previous support conversations
+- View support conversations
 - Send messages to support
 - Track ticket status
-- FAQ assistant for common questions
+- Frontend FAQ assistant
 
 ---
 
-# 🎨 Artist Features
+## 🎨 Artist
 
-Artists have access to a dedicated artist dashboard.
-
-### Artwork Management
+### 🖼️ Artwork Management
 
 - Upload artwork
 - Add artwork information
@@ -98,18 +105,16 @@ Artists have access to a dedicated artist dashboard.
 - Manage artwork listings
 - View artwork-related information
 
-### Order Management
+### 📦 Order Management
 
-- View orders related to their artwork
+- View orders related to artist artwork
 - Track order status
 
 ---
 
-# 🛡️ Admin Features
+## 🛡️ Admin
 
-Administrators have access to a dedicated administration dashboard.
-
-### User Management
+### 👥 User Management
 
 - View users
 - Manage customer accounts
@@ -117,48 +122,48 @@ Administrators have access to a dedicated administration dashboard.
 - Enable/disable accounts
 - Role-based access control
 
-### Artwork Management
+### 🖼️ Artwork Management
 
 - View artworks
 - Manage artwork listings
-- Remove inappropriate or unwanted artwork
+- Remove unwanted artwork
 
-### Category Management
+### 🏷️ Category Management
 
 - Create categories
 - Update categories
 - Delete categories
 - Manage artwork classification
 
-### Order Management
+### 📦 Order Management
 
 - View all orders
 - View order details
 - Update order status
-- Manage order lifecycle
+- Manage the order lifecycle
 
-### Support Management
+### 💬 Support Management
 
 - View customer support tickets
 - View ticket conversations
 - Reply to customers
 - Update ticket status
 
-### Announcements
+### 📢 Announcements
 
 - Create announcements
 - Send announcements to users
-- Email-based announcements
+- Send announcement emails
 
 ---
 
 # 🔐 Security
 
-The application implements multiple authentication and authorization mechanisms.
+Aurelian Gallery uses multiple authentication and authorization mechanisms.
 
 ## JWT Authentication
 
-JSON Web Tokens are used for authenticated API requests.
+Authenticated API requests use JSON Web Tokens.
 
 The backend:
 
@@ -170,15 +175,11 @@ The backend:
 
 ## Role-Based Authorization
 
-The application supports:
-
 ```text
 ROLE_ADMIN
 ROLE_ARTIST
 ROLE_CUSTOMER
-````
-
-Backend endpoints are protected using Spring Security and method-level authorization.
+```
 
 Example:
 
@@ -204,45 +205,42 @@ New accounts must verify their email address before completing the normal login 
 
 ## OTP Security
 
-OTP-based verification is used for:
+OTP verification is used for:
 
-* Password reset
-* Account reactivation
+- Password reset
+- Account reactivation
 
 ---
 
 # 🏗️ System Architecture
 
 ```text
-                    ┌─────────────────────┐
-                    │     React Frontend  │
-                    │      Vite + React   │
-                    └──────────┬──────────┘
-                               │
-                               │ REST API
-                               ▼
-                    ┌─────────────────────┐
-                    │   Spring Boot API   │
-                    │                     │
-                    │ Controllers         │
-                    │ Services            │
-                    │ Repositories        │
-                    │ Security            │
-                    └───────┬─────┬───────┘
-                            │     │
-                 ┌──────────┘     └──────────┐
-                 ▼                           ▼
-        ┌─────────────────┐        ┌─────────────────┐
-        │     MySQL       │        │   Gmail SMTP    │
-        │    Database     │        │ Email Services  │
-        └─────────────────┘        └─────────────────┘
+┌───────────────────────────────┐
+│        React Frontend         │
+│          Vite + React         │
+└───────────────┬───────────────┘
+                │
+                │ REST API / WebSocket
+                ▼
+┌───────────────────────────────┐
+│        Spring Boot API        │
+│                               │
+│ Controllers                   │
+│ Services                      │
+│ Repositories                  │
+│ Security                      │
+└───────────┬───────────┬───────┘
+            │           │
+            ▼           ▼
+┌────────────────┐  ┌────────────────┐
+│     MySQL      │  │   Gmail SMTP   │
+│    Database    │  │ Email Services │
+└────────────────┘  └────────────────┘
 
-                            │
-                            ▼
-                   ┌─────────────────┐
-                   │  Google OAuth   │
-                   │  Authentication │
-                   └─────────────────┘
+                ┌────────────────┐
+                │  Google OAuth  │
+                │ Authentication │
+                └────────────────┘
 ```
 
 ---
@@ -251,50 +249,44 @@ OTP-based verification is used for:
 
 ## Frontend
 
-| Technology   | Purpose                 |
-| ------------ | ----------------------- |
-| React        | User interface          |
-| Vite         | Frontend build tool     |
-| React Router | Client-side routing     |
-| Axios        | REST API communication  |
-| STOMP.js     | WebSocket communication |
-| Recharts     | Data visualization      |
-| Lucide React | Icons                   |
-| Sonner       | Toast notifications     |
-| Tailwind CSS | Utility-based styling   |
-
----
+| Technology | Purpose |
+|---|---|
+| **React** | User interface |
+| **Vite** | Frontend build tool |
+| **React Router** | Client-side routing |
+| **Axios** | REST API communication |
+| **STOMP.js** | WebSocket communication |
+| **Recharts** | Data visualization |
+| **Lucide React** | Icons |
+| **Sonner** | Toast notifications |
+| **Tailwind CSS** | Utility-based styling |
 
 ## Backend
 
-| Technology        | Purpose                        |
-| ----------------- | ------------------------------ |
-| Java              | Backend programming language   |
-| Spring Boot       | Backend framework              |
-| Spring Security   | Authentication & authorization |
-| Spring Data JPA   | Database access                |
-| Hibernate         | ORM                            |
-| JWT               | Token-based authentication     |
-| OAuth 2.0         | Google authentication          |
-| JavaMail          | Email functionality            |
-| STOMP / WebSocket | Real-time notifications        |
-| Maven             | Dependency management          |
-
----
+| Technology | Purpose |
+|---|---|
+| **Java** | Backend programming language |
+| **Spring Boot** | Backend framework |
+| **Spring Security** | Authentication & authorization |
+| **Spring Data JPA** | Database access |
+| **Hibernate** | ORM |
+| **JWT** | Token-based authentication |
+| **OAuth 2.0** | Google authentication |
+| **JavaMail** | Email functionality |
+| **STOMP / WebSocket** | Real-time notifications |
+| **Maven** | Dependency management |
 
 ## Database
 
-```text
-MySQL
-```
+**MySQL**
 
 The application uses:
 
-* JPA entities
-* Hibernate ORM
-* Repository pattern
-* Relational database relationships
-* Foreign-key relationships
+- JPA entities
+- Hibernate ORM
+- Repository pattern
+- Relational database relationships
+- Foreign-key relationships
 
 ---
 
@@ -303,54 +295,37 @@ The application uses:
 ```text
 ArtGallerySpringBootAndReact/
 │
-├── artgallery/
-│   │
+├── artgallery/                         # Spring Boot backend
 │   ├── src/
 │   │   ├── main/
-│   │   │   ├── java/
-│   │   │   │   └── com/artgallery/
-│   │   │   │       ├── config/
-│   │   │   │       ├── controller/
-│   │   │   │       ├── dto/
-│   │   │   │       ├── entity/
-│   │   │   │       ├── enums/
-│   │   │   │       ├── repository/
-│   │   │   │       ├── security/
-│   │   │   │       └── service/
-│   │   │   │
+│   │   │   ├── java/com/artgallery/
+│   │   │   │   ├── config/
+│   │   │   │   ├── controller/
+│   │   │   │   ├── dto/
+│   │   │   │   ├── entity/
+│   │   │   │   ├── enums/
+│   │   │   │   ├── repository/
+│   │   │   │   ├── security/
+│   │   │   │   └── service/
 │   │   │   └── resources/
 │   │   │       ├── email/
 │   │   │       ├── static/
 │   │   │       └── application.properties
-│   │   │
 │   │   └── test/
-│   │
 │   └── pom.xml
 │
-├── artgallery-frontend/
-│   │
+├── artgallery-frontend/                # React frontend
 │   ├── src/
 │   │   ├── components/
 │   │   ├── pages/
 │   │   ├── services/
 │   │   ├── context/
 │   │   └── assets/
-│   │
 │   ├── package.json
 │   └── vite.config.js
 │
 └── README.md
 ```
-
----
-
-# 🔑 User Roles
-
-| Role     | Access                                           |
-| -------- | ------------------------------------------------ |
-| Customer | Browse, wishlist, cart, orders, reviews, support |
-| Artist   | Upload and manage artwork, view related orders   |
-| Admin    | Full management access                           |
 
 ---
 
@@ -374,13 +349,8 @@ Send Verification Email
 User Verifies Email
    │
    ▼
-Account Activated
-   │
-   ▼
-Login
+Account Ready for Login
 ```
-
----
 
 ## Login
 
@@ -390,17 +360,17 @@ User Login
     ▼
 Validate Credentials
     │
-    ├── Invalid ──────► Reject
+    ├── Invalid ───────► Reject
     │
     ▼
 Check Account Status
     │
-    ├── Disabled ─────► Reactivation OTP
+    ├── Disabled ──────► Reactivation OTP
     │
     ▼
 Check Email Verification
     │
-    ├── Not Verified ─► Verification Required
+    ├── Not Verified ──► Verification Required
     │
     ▼
 Generate JWT
@@ -413,39 +383,37 @@ Authenticated Session
 
 # 📧 Email System
 
-The application integrates with Gmail SMTP for transactional emails.
+The application integrates with **Gmail SMTP** for transactional emails.
 
 Emails are used for:
 
-* Email verification
-* Password reset OTP
-* Account reactivation OTP
-* Order confirmation
-* Order status updates
-* Announcements
+- Email verification
+- Password reset OTP
+- Account reactivation OTP
+- Order confirmation
+- Order status updates
+- Announcements
 
-Email messages use a common Aurelian Gallery HTML template with:
+Email messages use a common Aurelian Gallery HTML template featuring:
 
-* Responsive layout
-* Aurelian Gallery branding
-* Embedded logo
-* HTML formatting
-* Security-related messaging
+- Responsive layout
+- Aurelian Gallery branding
+- Embedded logo
+- HTML formatting
+- Security-related messaging
 
 ---
 
 # 🔔 Real-Time Notifications
 
-The application uses WebSocket/STOMP communication for real-time notifications.
+The application uses **WebSocket/STOMP** communication for real-time notifications.
 
-Notifications can be generated for events such as:
+Notifications can be generated for:
 
-* New orders
-* Order status changes
-* Account events
-* Other important user activities
-
-The frontend maintains the notification state and displays unread notifications through the notification interface.
+- New orders
+- Order status changes
+- Account events
+- Other important user activities
 
 ---
 
@@ -453,24 +421,22 @@ The frontend maintains the notification state and displays unread notifications 
 
 The support system is ticket-based.
 
-Customers can:
-
 ```text
 Create Ticket
-     │
-     ▼
+      │
+      ▼
 Select Category
-     │
-     ▼
+      │
+      ▼
 Add Message
-     │
-     ▼
+      │
+      ▼
 Support Team Responds
-     │
-     ▼
+      │
+      ▼
 Conversation Continues
-     │
-     ▼
+      │
+      ▼
 Ticket Resolved
 ```
 
@@ -480,17 +446,15 @@ Each ticket can contain multiple messages between the customer and administrator
 
 # 🤖 FAQ Assistant
 
-The customer support page includes a frontend-based FAQ assistant.
+The customer support page includes a **frontend-based FAQ assistant**.
 
 It provides answers to frequently asked questions related to:
 
-* Orders
-* Payments
-* Artworks
-* Accounts
-* Technical issues
-
-The FAQ assistant uses client-side matching to identify relevant questions.
+- Orders
+- Payments
+- Artworks
+- Accounts
+- Technical issues
 
 If no suitable answer is found, the customer can create a support request directly.
 
@@ -498,7 +462,7 @@ If no suitable answer is found, the customer can create a support request direct
 
 # 🛒 Order Management
 
-The order lifecycle supports multiple statuses:
+The order lifecycle supports:
 
 ```text
 PLACED
@@ -529,31 +493,31 @@ Customers can review artworks.
 
 The review system supports:
 
-* One review per customer per artwork
-* Creating reviews
-* Editing personal reviews
-* Deleting personal reviews
-* Displaying review summaries
-* Displaying customer reviews
+- One review per customer per artwork
+- Creating reviews
+- Editing personal reviews
+- Deleting personal reviews
+- Displaying review summaries
+- Displaying customer reviews
 
 ---
 
-# ⚙️ Installation
+# ⚙️ Installation & Setup
 
 ## Prerequisites
 
-Install the following before running the project:
+Make sure the following are installed:
 
-* Java 17+
-* Maven
-* Node.js
-* npm
-* MySQL
-* Git
+- **Java 17+**
+- **Maven**
+- **Node.js**
+- **npm**
+- **MySQL**
+- **Git**
 
 ---
 
-# 🗄️ Database Setup
+## 🗄️ Database Setup
 
 Create the MySQL database:
 
@@ -561,9 +525,7 @@ Create the MySQL database:
 CREATE DATABASE artgallery;
 ```
 
-Update the backend configuration with your MySQL credentials.
-
-Example:
+Update the backend configuration with your local MySQL credentials:
 
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/artgallery?useSSL=false&serverTimezone=Asia/Kolkata&allowPublicKeyRetrieval=true
@@ -573,11 +535,11 @@ spring.datasource.password=YOUR_MYSQL_PASSWORD
 
 ---
 
-# 🔐 Environment Configuration
+# 🔐 Configuration & Secrets
 
-**Do not commit real credentials to GitHub.**
+> ⚠️ **Never commit real credentials or secrets to GitHub.**
 
-The following values must be configured locally:
+Configure the following values locally:
 
 ```properties
 spring.datasource.username=YOUR_DATABASE_USERNAME
@@ -592,25 +554,20 @@ spring.security.oauth2.client.registration.google.client-id=YOUR_GOOGLE_CLIENT_I
 spring.security.oauth2.client.registration.google.client-secret=YOUR_GOOGLE_CLIENT_SECRET
 ```
 
-For Gmail SMTP, use a **Google App Password** rather than your normal Gmail password.
+For Gmail SMTP, use a **Google App Password** instead of your normal Gmail password.
+
+For production deployments, use environment variables or a dedicated secrets manager.
 
 ---
 
 # ▶️ Running the Backend
 
-Navigate to the backend directory:
-
 ```bash
 cd artgallery
-```
-
-Run the Spring Boot application:
-
-```bash
 mvn spring-boot:run
 ```
 
-The backend will start at:
+Backend:
 
 ```text
 http://localhost:8080
@@ -620,25 +577,13 @@ http://localhost:8080
 
 # ▶️ Running the Frontend
 
-Open another terminal:
-
 ```bash
 cd artgallery-frontend
-```
-
-Install dependencies:
-
-```bash
 npm install
-```
-
-Start the development server:
-
-```bash
 npm run dev
 ```
 
-The frontend will normally be available at:
+Frontend:
 
 ```text
 http://localhost:5173
@@ -650,7 +595,7 @@ http://localhost:5173
 
 The React frontend communicates with the Spring Boot backend through REST APIs.
 
-Example API structure:
+### Main API Groups
 
 ```text
 /api/auth/**
@@ -667,40 +612,71 @@ Authenticated APIs use JWT-based authorization.
 
 ---
 
-# 🔒 Security Notes
+# 🔒 Production Security Checklist
 
-Before deploying this project to production:
+Before deploying the application to production:
 
-* Replace development secrets
-* Never commit passwords
-* Never commit Gmail App Passwords
-* Never commit Google OAuth client secrets
-* Use environment variables or a secure secrets manager
-* Use HTTPS
-* Configure production CORS
-* Use a strong JWT secret
-* Use a production database configuration
-* Disable unnecessary debug logging
+- [ ] Replace all development secrets
+- [ ] Never commit passwords
+- [ ] Never commit Gmail App Passwords
+- [ ] Never commit Google OAuth client secrets
+- [ ] Use environment variables or a secure secrets manager
+- [ ] Enable HTTPS
+- [ ] Configure production CORS
+- [ ] Use a strong JWT secret
+- [ ] Use a production database configuration
+- [ ] Disable unnecessary debug logging
+- [ ] Configure production email credentials securely
 
 ---
 
-# 🧪 Development
+# 🧩 Backend Architecture
 
-The project can be developed locally using:
+The backend follows a layered architecture:
 
 ```text
-Frontend → http://localhost:5173
-Backend  → http://localhost:8080
-MySQL    → localhost:3306
+┌───────────────┐
+│  Controller   │
+└───────┬───────┘
+        │
+        ▼
+┌───────────────┐
+│    Service    │
+└───────┬───────┘
+        │
+        ▼
+┌───────────────┐
+│  Repository   │
+└───────┬───────┘
+        │
+        ▼
+┌───────────────┐
+│    MySQL      │
+└───────────────┘
 ```
+
+### Key Backend Concepts
+
+- RESTful APIs
+- DTOs
+- Service layer
+- Repository pattern
+- JPA/Hibernate
+- Spring Security
+- JWT authentication
+- OAuth 2.0
+- Role-based authorization
+- WebSockets
+- Transaction management
+- Email services
 
 ---
 
 # 📸 Screenshots
 
-Screenshots can be added here to showcase the application.
+Add screenshots of the application to make the repository easier to explore.
 
-Recommended screenshots:
+Recommended structure:
 
 ```text
 docs/
@@ -714,7 +690,7 @@ docs/
 └── support.png
 ```
 
-Then reference them using:
+Example:
 
 ```markdown
 ![Home Page](docs/home.png)
@@ -722,81 +698,47 @@ Then reference them using:
 
 ---
 
-# 🧩 Key Backend Concepts
-
-The backend follows a layered architecture:
-
-```text
-Controller
-    │
-    ▼
-Service
-    │
-    ▼
-Repository
-    │
-    ▼
-Database
-```
-
-The project uses:
-
-* RESTful APIs
-* DTOs
-* Service layer
-* Repository pattern
-* JPA/Hibernate
-* Spring Security
-* JWT authentication
-* OAuth 2.0
-* Role-based authorization
-* WebSockets
-* Transaction management
-* Email services
-
----
-
 # 🎯 Learning Objectives
 
 This project demonstrates practical implementation of:
 
-* Full-stack application development
-* REST API development
-* Spring Boot
-* React
-* Database design
-* Authentication and authorization
-* JWT
-* OAuth 2.0
-* CRUD operations
-* File uploads
-* E-commerce workflows
-* WebSocket communication
-* Email integration
-* Role-based access control
-* Frontend routing
-* API integration
-* Customer support systems
+- Full-stack application development
+- REST API development
+- Spring Boot
+- React
+- Database design
+- Authentication and authorization
+- JWT
+- OAuth 2.0
+- CRUD operations
+- File uploads
+- E-commerce workflows
+- WebSocket communication
+- Email integration
+- Role-based access control
+- Frontend routing
+- API integration
+- Customer support systems
 
 ---
 
 # 🔮 Future Improvements
 
-Possible future improvements include:
+Potential future improvements include:
 
-* Payment gateway integration
-* Cloud image storage
-* Production deployment
-* Docker support
-* Automated testing
-* CI/CD pipeline
-* Advanced artwork search
-* Recommendation system
-* Analytics dashboard
-* Artist verification
-* Advanced reporting
-* Cloud-based email service
-* Redis caching
+- 💳 Payment gateway integration
+- ☁️ Cloud image storage
+- 🚀 Production deployment
+- 🐳 Docker support
+- 🧪 Automated testing
+- 🔄 CI/CD pipeline
+- 🔎 Advanced artwork search
+- 🤖 Artwork recommendation system
+- 📊 Analytics dashboard
+- 🎨 Artist verification
+- 📈 Advanced reporting
+- ☁️ Cloud-based email service
+- ⚡ Redis caching
 
 ---
 
@@ -804,9 +746,9 @@ Possible future improvements include:
 
 ## Uday Reddy Kallam
 
-Computer Science Graduate | Full-Stack Developer
+**Computer Science Graduate · Full-Stack Developer**
 
-### Technologies
+### Tech Interests
 
 ```text
 Java
@@ -821,27 +763,21 @@ JWT
 OAuth 2.0
 ```
 
-### GitHub
+### 🔗 Links
 
-[https://github.com/udaykallam](https://github.com/udaykallam)
-
-### Repository
-
-[https://github.com/udaykallam/ArtGallerySpringBootAndReact](https://github.com/udaykallam/ArtGallerySpringBootAndReact)
+- **GitHub:** https://github.com/udaykallam
+- **Repository:** https://github.com/udaykallam/ArtGallerySpringBootAndReact
 
 ---
 
 # 📜 License
 
-This project is intended for educational and portfolio purposes.
+This project is intended for **educational and portfolio purposes**.
 
 ---
 
-<div align="center">
-
-## 🎨 Aurelian Gallery
-
-### Art. Elegance. Inspiration.
-
-</div>
-```
+<p align="center">
+  <strong>🎨 Aurelian Gallery</strong>
+  <br>
+  <em>Art. Elegance. Inspiration.</em>
+</p>
